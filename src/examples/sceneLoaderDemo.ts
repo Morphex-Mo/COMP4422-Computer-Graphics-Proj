@@ -4,6 +4,11 @@
 
 import * as THREE from 'three';
 import { defineScene, createLevelLoader, createLoadingUI } from '../core/SceneLoader';
+import {
+    GlobalSceneUtils,
+    SceneEnvironmentPresets,
+    applySceneEnvironment
+} from '../core/SceneConfig';
 
 /**
  * 示例1: 使用 defineScene 定义场景
@@ -283,5 +288,86 @@ export function startLevel2() {
 export function startLevel3() {
     console.log('Starting Level 3...');
     return loadLevel3WithUI();
+}
+
+/**
+ * 示例4: 使用共享相机和渲染器配置的场景
+ * 这个场景展示如何使用统一的相机和渲染器，确保多个场景之间的透视一致
+ */
+export const level4WithSharedConfig = defineScene({
+    id: 'level4_shared',
+    name: '第四关 - 共享配置演示',
+    resources: {},
+    main: async (resources) => {
+        console.log('[Level4] Starting with shared camera and renderer configuration...');
+
+        // 创建场景
+        const scene = new THREE.Scene();
+
+        // 应用预设环境配置
+        applySceneEnvironment(scene, SceneEnvironmentPresets.default);
+
+        // 获取全局共享的相机和渲染器
+        // 如果还未初始化，会自动使用默认配置初始化
+        const camera = GlobalSceneUtils.getCamera();
+        const renderer = GlobalSceneUtils.getRenderer();
+
+        // 重置相机到配置的初始位置
+        GlobalSceneUtils.resetCamera();
+
+        // 将渲染器附加到容器
+        GlobalSceneUtils.attachToContainer('app');
+
+        // 添加地面
+        const groundGeometry = new THREE.PlaneGeometry(20, 20);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x666666 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
+
+        // 添加一些彩色立方体
+        for (let i = 0; i < 10; i++) {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({
+                color: new THREE.Color().setHSL(i / 10, 0.7, 0.5)
+            });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.set(
+                (i % 5 - 2) * 2,
+                0.5,
+                Math.floor(i / 5) * 2 - 1
+            );
+            scene.add(cube);
+        }
+
+        // 动画循环
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            // 让立方体轻微浮动
+            scene.children.forEach((child, index) => {
+                if (child instanceof THREE.Mesh && child.geometry instanceof THREE.BoxGeometry) {
+                    child.position.y = 0.5 + Math.sin(time + index) * 0.2;
+                    child.rotation.y += 0.01;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        console.log('[Level4] Scene initialized with shared configuration!');
+        console.log('[Level4] Camera and renderer are shared across all scenes using GlobalSceneUtils');
+    },
+    onExit: () => {
+        console.log('[Level4] Exiting...');
+    }
+});
+
+export function startLevel4() {
+    console.log('Starting Level 4 (Shared Config)...');
+    return level4WithSharedConfig();
 }
 

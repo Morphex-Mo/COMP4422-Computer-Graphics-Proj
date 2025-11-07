@@ -23,4 +23,16 @@ export {
     createLoadingUI,
     SimpleSceneDefinition
 } from './SceneLoader';
+export {
+    CameraConfig,
+    RendererConfig,
+    SceneEnvironmentConfig,
+    CameraPresets,
+    RendererPresets,
+    SceneEnvironmentPresets,
+    createCamera,
+    createRenderer,
+    applySceneEnvironment,
+    GlobalSceneUtils
+} from './SceneConfig';
 

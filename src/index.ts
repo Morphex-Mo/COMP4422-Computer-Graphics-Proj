@@ -1,18 +1,52 @@
-import * as THREE from 'three';
-import { globalTimer } from './core';
-import { runAnimationDemo, runTimerDemo, runPerformanceTest } from './examples/demo';
 import { startSimpleTest, startTestWithUI } from './examples/testScene';
+import { startLevel1, startLevel2, startLevel3, startLevel4 } from './examples/sceneLoaderDemo';
+import {
+    initializeGlobalConfig,
+    startSharedScene1,
+    startSharedScene2,
+    startSharedScene3
+} from './examples/sharedConfigDemo';
+import {globalTimer} from "./core";
+
+// 初始化全局场景配置（统一的相机和渲染器）
+initializeGlobalConfig();
+console.log('[App] Global scene configuration initialized');
 
 // 将测试函数暴露到全局window对象，方便在控制台调用
 declare global {
     interface Window {
         startSimpleTest: () => Promise<void>;
         startTestWithUI: () => Promise<void>;
+        startLevel1: () => Promise<void>;
+        startLevel2: () => Promise<void>;
+        startLevel3: () => Promise<void>;
+        startLevel4: () => Promise<void>;
+        startSharedScene1: () => Promise<void>;
+        startSharedScene2: () => Promise<void>;
+        startSharedScene3: () => Promise<void>;
     }
 }
 
 window.startSimpleTest = startSimpleTest;
 window.startTestWithUI = startTestWithUI;
+window.startLevel1 = startLevel1;
+window.startLevel2 = startLevel2;
+window.startLevel3 = startLevel3;
+window.startLevel4 = startLevel4;
+window.startSharedScene1 = startSharedScene1;
+window.startSharedScene2 = startSharedScene2;
+window.startSharedScene3 = startSharedScene3;
+
+console.log('[App] Available scene functions:');
+console.log('  - startSimpleTest()');
+console.log('  - startTestWithUI()');
+console.log('  - startLevel1()');
+console.log('  - startLevel2()');
+console.log('  - startLevel3()');
+console.log('  - startLevel4() - Uses shared camera/renderer');
+console.log('  - startSharedScene1() - Shared config demo 1');
+console.log('  - startSharedScene2() - Shared config demo 2');
+console.log('  - startSharedScene3() - Shared config demo 3');
 /*
 // Hello World 示例
 console.log('Hello World from TypeScript!');
