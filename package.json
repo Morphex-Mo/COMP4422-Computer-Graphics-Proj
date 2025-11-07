@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development",
+    "start": "webpack serve --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +23,17 @@
   "homepage": "https://github.com/Morphex-Mo/COMP4422-Computer-Graphics-Proj#readme",
   "dependencies": {
     "three": "^0.181.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.181.0",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
   }
 }
