@@ -11,7 +11,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
  */
 const animeToonShader = {
     vertexShader: `
-        #include <common>
+                #include <common>
         #include <normal_pars_vertex>
         #ifdef USE_SKINNING
             #include <skinning_pars_vertex>
@@ -24,6 +24,7 @@ const animeToonShader = {
         varying vec2 vUv;
         #include <envmap_pars_vertex>
         #include <shadowmap_pars_vertex>
+        #include <fog_pars_vertex> // ADDED
         void main() {
             vUv = uv;
             
@@ -57,11 +58,12 @@ const animeToonShader = {
             #include <defaultnormal_vertex>
             #include <shadowmap_vertex>
             #include <envmap_vertex>
+            #include <fog_vertex> // ADDED
         }
     `,
 
     fragmentShader: `
-        #define ENV_WORLDPOS
+          #define ENV_WORLDPOS
         #define USE_ENVMAP
         #include <common>
         #include <packing>
@@ -70,6 +72,7 @@ const animeToonShader = {
         #include <envmap_pars_fragment>
         #include <shadowmap_pars_fragment>
         #include <shadowmask_pars_fragment>
+        #include <fog_pars_fragment> // ADDED
         
         uniform vec3 uColor;
         uniform vec3 uLightDirection;
@@ -183,6 +186,7 @@ const animeToonShader = {
             vec3 finalColor = ambient + diffuse + specular + rim;
             
             gl_FragColor = vec4(finalColor, 1.0);
+            #include <fog_fragment> // ADDED
         }
     `
 };
@@ -199,6 +203,7 @@ function createAnimeToonMaterial(originalMaterial: THREE.Material, mesh: THREE.S
     const uniforms = THREE.UniformsUtils.merge([
         THREE.UniformsLib.common,
         THREE.UniformsLib.lights,
+        THREE.UniformsLib.fog,
         {
             uColor: { value: color },
             uLightDirection: { value: new THREE.Vector3(0, 0, 0) }, // 将在渲染循环中更新
@@ -230,6 +235,7 @@ function createAnimeToonMaterial(originalMaterial: THREE.Material, mesh: THREE.S
         vertexShader: animeToonShader.vertexShader,
         fragmentShader: animeToonShader.fragmentShader,
         lights: true,
+        fog: true,
         side: material.side || THREE.FrontSide,
         transparent: material.transparent || false
     });
@@ -263,6 +269,9 @@ export const foxScene = defineScene({
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xffd7a8);
 
+        // 添加雾效
+        scene.fog = new THREE.FogExp2(0xffd7a8, 0.1); // 颜色与背景一致，near=5, far=20
+
         const camera = new THREE.PerspectiveCamera(
             75,
             window.innerWidth / window.innerHeight,
@@ -290,11 +299,13 @@ export const foxScene = defineScene({
         controls.update();
 
         // 增强环境光，减少整体对比度
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        //深蓝色
+        const ambientLight = new THREE.AmbientLight(0x00004d, 0.6);
         scene.add(ambientLight);
 
         // 调整主光源位置，使其更自然
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        //浅一点的蓝紫色
+        const directionalLight = new THREE.DirectionalLight(0x3333cc, 0.9);
         directionalLight.position.set(0, 1, 1);
         directionalLight.castShadow = true;
         directionalLight.shadow.camera.left = -20;
@@ -317,7 +328,7 @@ export const foxScene = defineScene({
             const fox = foxGltf.scene;
             fox.position.set(0, 2, 0);
             fox.scale.set(1, 1, 1);
-
+            fox.rotation.set(0,-Math.PI/2,0);
             fox.traverse((child: any) => {
                 if (child.isMesh) {
                     child.castShadow = true;
@@ -364,7 +375,8 @@ export const foxScene = defineScene({
                 uniforms: THREE.UniformsUtils.clone({
                     ...THREE.UniformsLib.common,
                     ...THREE.UniformsLib.lights,
-                    uColor: { value: new THREE.Color(0xff0000) },
+                    ...THREE.UniformsLib.fog,
+                    uColor: { value: new THREE.Color(0xEE8E69) },
                     uLightDirection: { value: new THREE.Vector3(0, 0, 0) },
                     uLightColor: { value: new THREE.Color(0xffffff) },
                     uShadowThreshold: { value: 0.3 },
@@ -372,7 +384,7 @@ export const foxScene = defineScene({
                     uSpecularThreshold: { value: 0.7 },
                     uSpecularSmoothness: { value: 0.1 },
                     uSpecularPower: { value: 16.0 },
-                    uSpecularIntensity: { value: 2 },
+                    uSpecularIntensity: { value: 0.2 },
                     uDiffuseStrength: { value: 0.9 },
                     uShadowIntensity: { value: 0.4 },
                     uAmbientStrength: { value: 0.35 },
@@ -384,44 +396,18 @@ export const foxScene = defineScene({
                 }),
                 vertexShader: animeToonShader.vertexShader,
                 fragmentShader: animeToonShader.fragmentShader,
-                lights: true
-            });
-
-            const rightToonMaterial = new THREE.ShaderMaterial({
-                uniforms: THREE.UniformsUtils.clone({
-                    ...THREE.UniformsLib.common,
-                    ...THREE.UniformsLib.lights,
-                    uColor: { value: new THREE.Color(0x0000ff) },
-                    uLightDirection: { value: new THREE.Vector3(0, 0, 0) },
-                    uLightColor: { value: new THREE.Color(0xffffff) },
-                    uShadowThreshold: { value: 0.3 },
-                    uShadowSmoothness: { value: 0.4 },
-                    uSpecularThreshold: { value: 0.7 },
-                    uSpecularSmoothness: { value: 0.1 },
-                    uSpecularPower: { value: 16.0 },
-                    uSpecularIntensity: { value: 2 },
-                    uDiffuseStrength: { value: 0.9 },
-                    uShadowIntensity: { value: 0.4 },
-                    uAmbientStrength: { value: 0.35 },
-                    uRimThreshold: { value: 0.5 },
-                    uRimAmount: { value: 0.6 },
-                    uRimColor: { value: new THREE.Color(0x6699cc) },
-                    uTexture: { value: null },
-                    uUseTexture: { value: false }
-                }),
-                vertexShader: animeToonShader.vertexShader,
-                fragmentShader: animeToonShader.fragmentShader,
-                lights: true
+                lights: true,
+                fog:true,
             });
 
             const leftSphere = new THREE.Mesh(sphereGeometry, leftToonMaterial);
-            const rightSphere = new THREE.Mesh(sphereGeometry, rightToonMaterial);
+            const rightSphere = new THREE.Mesh(sphereGeometry, leftToonMaterial);
 
             leftSphere.castShadow = true;
             rightSphere.castShadow = true;
 
             customMaterials.push(leftToonMaterial);
-            customMaterials.push(rightToonMaterial);
+            customMaterials.push(leftToonMaterial);
 
             if (leftHandBone) {
                 leftHandBone.add(leftSphere);
@@ -502,7 +488,7 @@ export const foxScene = defineScene({
 
                     // 转换到视图空间（使用相机的视图矩阵的法线矩阵部分）
                     const viewLightDir = worldLightDir.clone().transformDirection(camera.matrixWorldInverse);
-
+                    material.uniforms.uLightColor.value.copy(directionalLight.color);
                     material.uniforms.uLightDirection.value.copy(viewLightDir);
                 }
             });
