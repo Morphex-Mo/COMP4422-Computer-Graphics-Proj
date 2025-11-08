@@ -4,7 +4,8 @@
 
 import { defineScene, createLoadingUI } from '../../core';
 import * as THREE from 'three';
-
+let simpleTestCleanup = null;
+let animationFrameId=null;
 /**
  * 简单测试场景 - 不需要任何外部资源文件
  */
@@ -148,9 +149,58 @@ export const simpleTestScene = defineScene({
         appElement?.appendChild(infoDiv);
 
         console.log('[SimpleTest] 场景初始化完成！');
+
+        // 存储清理函数供onExit使用
+        simpleTestCleanup = () => {
+            console.log('[SimpleTest] 清理资源...');
+
+            // 停止渲染循环
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
+            // 移除事件监听器
+            window.removeEventListener('resize', onWindowResize);
+
+            // 清理Three.js资源
+            renderer.dispose();
+
+            // 清理几何体和材质
+            scene.traverse((object: any) => {
+                if (object.geometry) {
+                    object.geometry.dispose();
+                }
+                if (object.material) {
+                    if (Array.isArray(object.material)) {
+                        object.material.forEach((material: any) => material.dispose());
+                    } else {
+                        object.material.dispose();
+                    }
+                }
+            });
+
+            // 清空场景
+            while (scene.children.length > 0) {
+                scene.remove(scene.children[0]);
+            }
+
+            // 清空DOM容器
+            if (appElement) {
+                appElement.innerHTML = '';
+            }
+
+            console.log('[SimpleTest] 清理完成！');
+        };
     },
     onExit: () => {
         console.log('[SimpleTest] 退出场景');
+
+        // 调用清理函数
+        if (simpleTestCleanup) {
+            simpleTestCleanup();
+            simpleTestCleanup = null;
+        }
     }
 });
 

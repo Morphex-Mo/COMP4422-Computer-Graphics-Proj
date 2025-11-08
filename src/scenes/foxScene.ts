@@ -4,6 +4,12 @@
 import * as THREE from 'three';
 import { defineScene } from '../core';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+/**
+ * 场景清理函数（模块级别）
+ */
+let cleanupFunction: (() => void) | null = null;
+
 /**
  * Fox场景定义
  */
@@ -21,6 +27,11 @@ export const foxScene = defineScene({
     main: async (resources) => {
         console.log('[Fox Scene] All resources loaded!');
         console.log('[Fox Scene] Starting scene...');
+
+        // 用于清理资源的变量
+        let animationFrameId: number | null = null;
+        let mixer: THREE.AnimationMixer | null = null;
+        let clock: THREE.Clock | null = null;
 
         // 获取加载的fox模型
         const foxGltf = resources.get('fox');
@@ -95,32 +106,12 @@ export const foxScene = defineScene({
             console.log('[Fox Scene] Fox model added to scene');
 
             // 如果模型包含动画，播放第一个动画
-            /*if (foxGltf.animations && foxGltf.animations.length > 0) {
-                const mixer = new THREE.AnimationMixer(fox);
+            if (foxGltf.animations && foxGltf.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(fox);
                 const action = mixer.clipAction(foxGltf.animations[0]);
                 action.play();
+                clock = new THREE.Clock();
                 console.log(`[Fox Scene] Playing animation: ${foxGltf.animations[0].name}`);
-
-                // 在渲染循环中更新动画
-                const clock = new THREE.Clock();
-                const animate = () => {
-                    requestAnimationFrame(animate);
-
-                    const delta = clock.getDelta();
-                    mixer.update(delta);
-
-                    controls.update();
-                    renderer.render(scene, camera);
-                };
-                animate();
-            } else */{
-                // 没有动画时的普通渲染循环
-                const animate = () => {
-                    requestAnimationFrame(animate);
-                    controls.update();
-                    renderer.render(scene, camera);
-                };
-                animate();
             }
         } else {
             console.error('[Fox Scene] Failed to load fox model');
@@ -154,12 +145,75 @@ export const foxScene = defineScene({
         };
         window.addEventListener('resize', handleResize);
 
+        // 渲染循环
+        const animate = () => {
+            animationFrameId = requestAnimationFrame(animate);
+
+            // 更新动画混合器
+            if (mixer && clock) {
+                const delta = clock.getDelta();
+                mixer.update(delta);
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        };
+        animate();
+
         console.log('[Fox Scene] Scene setup complete!');
+
+        // 存储清理函数供onExit使用
+        cleanupFunction = () => {
+            console.log('[Fox Scene] Cleaning up resources...');
+
+            // 停止渲染循环
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
+            // 移除事件监听器
+            window.removeEventListener('resize', handleResize);
+
+            // 清理Three.js资源
+            controls.dispose();
+            renderer.dispose();
+
+            // 清理几何体和材质
+            scene.traverse((object: any) => {
+                if (object.geometry) {
+                    object.geometry.dispose();
+                }
+                if (object.material) {
+                    if (Array.isArray(object.material)) {
+                        object.material.forEach((material: any) => material.dispose());
+                    } else {
+                        object.material.dispose();
+                    }
+                }
+            });
+
+            // 清空场景
+            while (scene.children.length > 0) {
+                scene.remove(scene.children[0]);
+            }
+
+            // 清空DOM容器
+            if (appElement) {
+                appElement.innerHTML = '';
+            }
+
+            console.log('[Fox Scene] Cleanup complete!');
+        };
     },
-    onExit: () => {
+    onExit: async () => {
         console.log('[Fox Scene] Exiting scene...');
-        // 清理资源
-        window.removeEventListener('resize', () => {});
+
+        // 调用清理函数
+        if (cleanupFunction) {
+            cleanupFunction();
+            cleanupFunction = null;
+        }
     }
 });
 
