@@ -87,10 +87,42 @@ export const foxScene = defineScene({
 
         const foxGltf = resources.get('fox');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffd7a8);
+
+        // 创建天空盒 - 使用渐变色天空
+        const skyboxGeometry = new THREE.SphereGeometry(500, 32, 32);
+        const skyboxMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                topColor: { value: new THREE.Color(0x87ceeb) },    // 天空蓝
+                bottomColor: { value: new THREE.Color(0xffd7a8) }, // 温暖的桃色
+                offset: { value: 33 },
+                exponent: { value: 0.6 }
+            },
+            vertexShader: `
+                varying vec3 vWorldPosition;
+                void main() {
+                    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                    vWorldPosition = worldPosition.xyz;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 topColor;
+                uniform vec3 bottomColor;
+                uniform float offset;
+                uniform float exponent;
+                varying vec3 vWorldPosition;
+                void main() {
+                    float h = normalize(vWorldPosition + offset).y;
+                    gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+                }
+            `,
+            side: THREE.BackSide
+        });
+        const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+        scene.add(skybox);
 
         // 添加雾效
-        scene.fog = new THREE.FogExp2(0xffd7a8, 0.1); // 颜色与背景一致，near=5, far=20
+        scene.fog = new THREE.FogExp2(0xffd7a8, 0.1); // 颜色与背景一致
 
         const camera = new THREE.PerspectiveCamera(
             75,
@@ -338,6 +370,7 @@ export const foxScene = defineScene({
             controls.dispose();
             renderer.dispose();
             groundMaterial.dispose();
+            skyboxMaterial.dispose(); // 清理天空盒材质
 
             scene.traverse((object: any) => {
                 if (object.geometry) {

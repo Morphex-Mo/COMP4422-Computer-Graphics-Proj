@@ -2,6 +2,7 @@ import {startSharedScene1, startSharedScene2, startSharedScene3} from "../scenes
 import {startSimpleTest, startTestWithUI} from "../scenes/examples/testScene";
 import {startLevel1, startLevel2, startLevel3, startLevel4} from "../scenes/examples/sceneLoaderDemo";
 import {startFoxScene} from "../scenes/foxScene";
+import {startCubeScene} from "../scenes/cubeScene";
 import {SceneSelector} from "./SceneSelector";
 
 // ============================================
@@ -9,6 +10,12 @@ import {SceneSelector} from "./SceneSelector";
 // ============================================
 
 export const testSceneSelector:SceneSelector = new SceneSelector([
+    {
+        id: 'cube_scene',
+        name: 'Cube Scene (Skybox + Fog)',
+        description: '简单场景 - 展示天空盒、雾效和Toon Shader立方体',
+        handler: startCubeScene
+    },
     {
         id: 'fox_scene',
         name: 'Fox Model Scene',
