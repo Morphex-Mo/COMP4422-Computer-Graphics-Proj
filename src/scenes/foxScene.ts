@@ -293,7 +293,7 @@ export const foxScene = defineScene({
 
         // 调整主光源位置，使其更自然
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
-        directionalLight.position.set(5, 10, 7);
+        directionalLight.position.set(0, 1, 1);
         directionalLight.castShadow = true;
         directionalLight.shadow.camera.left = -20;
         directionalLight.shadow.camera.right = 20;
@@ -305,9 +305,9 @@ export const foxScene = defineScene({
         scene.add(directionalLight);
 
         // 添加辅助光，填充阴影区域
-        const fillLight = new THREE.DirectionalLight(0xaaccff, 0.3);
-        fillLight.position.set(-5, 3, -5);
-        scene.add(fillLight);
+        //const fillLight = new THREE.DirectionalLight(0xaaccff, 0.3);
+        //fillLight.position.set(-5, 3, -5);
+        //scene.add(fillLight);
 
         console.log(foxGltf);
 
@@ -348,6 +348,106 @@ export const foxScene = defineScene({
                 });
                 clock = new THREE.Clock();
             }
+
+
+
+            // 添加两个球体代替手部，方便观察效果
+            const leftHandBone = fox.getObjectByName('LeftHand') || fox.getObjectByName('mixamorigLeftHand');
+            const rightHandBone = fox.getObjectByName('RightHand') || fox.getObjectByName('mixamorigRightHand');
+
+            const sphereGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+
+// 使用自定义 Toon Shader 材质
+            const leftToonMaterial = new THREE.ShaderMaterial({
+                uniforms: THREE.UniformsUtils.clone({
+                    ...THREE.UniformsLib.common,
+                    ...THREE.UniformsLib.lights,
+                    uColor: { value: new THREE.Color(0xff0000) },
+                    uLightDirection: { value: new THREE.Vector3(0, 0, 0) },
+                    uLightColor: { value: new THREE.Color(0xffffff) },
+                    uShadowThreshold: { value: 0.3 },
+                    uShadowSmoothness: { value: 0.4 },
+                    uSpecularThreshold: { value: 0.7 },
+                    uSpecularSmoothness: { value: 0.1 },
+                    uSpecularPower: { value: 16.0 },
+                    uSpecularIntensity: { value: 0.3 },
+                    uDiffuseStrength: { value: 0.9 },
+                    uShadowIntensity: { value: 0.4 },
+                    uAmbientStrength: { value: 0.35 },
+                    uRimThreshold: { value: 0.5 },
+                    uRimAmount: { value: 0.6 },
+                    uRimColor: { value: new THREE.Color(0x6699cc) },
+                    uTexture: { value: null },
+                    uUseTexture: { value: false }
+                }),
+                vertexShader: animeToonShader.vertexShader,
+                fragmentShader: animeToonShader.fragmentShader,
+                lights: true
+            });
+
+            const rightToonMaterial = new THREE.ShaderMaterial({
+                uniforms: THREE.UniformsUtils.clone({
+                    ...THREE.UniformsLib.common,
+                    ...THREE.UniformsLib.lights,
+                    uColor: { value: new THREE.Color(0x0000ff) },
+                    uLightDirection: { value: new THREE.Vector3(0, 0, 0) },
+                    uLightColor: { value: new THREE.Color(0xffffff) },
+                    uShadowThreshold: { value: 0.3 },
+                    uShadowSmoothness: { value: 0.4 },
+                    uSpecularThreshold: { value: 0.7 },
+                    uSpecularSmoothness: { value: 0.1 },
+                    uSpecularPower: { value: 16.0 },
+                    uSpecularIntensity: { value: 0.3 },
+                    uDiffuseStrength: { value: 0.9 },
+                    uShadowIntensity: { value: 0.4 },
+                    uAmbientStrength: { value: 0.35 },
+                    uRimThreshold: { value: 0.5 },
+                    uRimAmount: { value: 0.6 },
+                    uRimColor: { value: new THREE.Color(0x6699cc) },
+                    uTexture: { value: null },
+                    uUseTexture: { value: false }
+                }),
+                vertexShader: animeToonShader.vertexShader,
+                fragmentShader: animeToonShader.fragmentShader,
+                lights: true
+            });
+
+            const leftSphere = new THREE.Mesh(sphereGeometry, leftToonMaterial);
+            const rightSphere = new THREE.Mesh(sphereGeometry, rightToonMaterial);
+
+            leftSphere.castShadow = true;
+            rightSphere.castShadow = true;
+
+            customMaterials.push(leftToonMaterial);
+            customMaterials.push(rightToonMaterial);
+
+            if (leftHandBone) {
+                leftHandBone.add(leftSphere);
+                console.log('[Fox Scene] Added left hand sphere (red) with custom shader');
+            } else {
+                // 左手位置（X轴负方向）
+                leftSphere.position.set(-1, 2, 0);
+                scene.add(leftSphere);
+                console.log('[Fox Scene] Left hand bone not found, sphere placed at left position');
+            }
+
+            if (rightHandBone) {
+                rightHandBone.add(rightSphere);
+                console.log('[Fox Scene] Added right hand sphere (blue) with custom shader');
+            } else {
+                // 右手位置（X轴正方向）
+                rightSphere.position.set(1, 2, 0);
+                scene.add(rightSphere);
+                console.log('[Fox Scene] Right hand bone not found, sphere placed at right position');
+            }
+
+
+
+
+
+
+
+
         } else {
             console.error('[Fox Scene] Failed to load fox model');
         }
@@ -387,6 +487,10 @@ export const foxScene = defineScene({
             // ✅ 修复：正确更新光照方向
             customMaterials.forEach(material => {
                 if (material.uniforms.uLightDirection) {
+                    let time = Date.now() * 0.1*3.14159/180;
+                    let cos = Math.cos(time);
+                    let sin = Math.sin(time);
+                    directionalLight.position.set(cos, 1, sin);
                     // 光照方向应该是从光源指向场景中心的方向
                     const lightDir = new THREE.Vector3().subVectors(
                         new THREE.Vector3(0, 0, 0),  // 目标点（场景中心）
