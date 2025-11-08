@@ -61,6 +61,8 @@ const animeToonShader = {
     `,
 
     fragmentShader: `
+        #define ENV_WORLDPOS
+        #define USE_ENVMAP
         #include <common>
         #include <packing>
         #include <lights_pars_begin>
@@ -120,7 +122,7 @@ const animeToonShader = {
         }
 
         void main() {
-            vec3 normal = normalize(vNormal);
+            #include <normal_fragment_begin>
             vec3 viewDir = normalize(vViewPosition);
 
             // 光照方向（从物体指向光源）
@@ -370,7 +372,7 @@ export const foxScene = defineScene({
                     uSpecularThreshold: { value: 0.7 },
                     uSpecularSmoothness: { value: 0.1 },
                     uSpecularPower: { value: 16.0 },
-                    uSpecularIntensity: { value: 0.3 },
+                    uSpecularIntensity: { value: 2 },
                     uDiffuseStrength: { value: 0.9 },
                     uShadowIntensity: { value: 0.4 },
                     uAmbientStrength: { value: 0.35 },
@@ -397,7 +399,7 @@ export const foxScene = defineScene({
                     uSpecularThreshold: { value: 0.7 },
                     uSpecularSmoothness: { value: 0.1 },
                     uSpecularPower: { value: 16.0 },
-                    uSpecularIntensity: { value: 0.3 },
+                    uSpecularIntensity: { value: 2 },
                     uDiffuseStrength: { value: 0.9 },
                     uShadowIntensity: { value: 0.4 },
                     uAmbientStrength: { value: 0.35 },
@@ -484,19 +486,24 @@ export const foxScene = defineScene({
                 mixer.update(delta);
             }
 
-            // ✅ 修复：正确更新光照方向
+            // ✅ 修复：更新光照方向（转换到视图空间，使光照不随相机旋转）
+            let time = Date.now() * 0.001; // 时间单位：秒
+            let cos = Math.cos(time);
+            let sin = Math.sin(time);
+            directionalLight.position.set(cos * 5, 5, sin * 5);
+
             customMaterials.forEach(material => {
                 if (material.uniforms.uLightDirection) {
-                    let time = Date.now() * 0.1*3.14159/180;
-                    let cos = Math.cos(time);
-                    let sin = Math.sin(time);
-                    directionalLight.position.set(cos, 1, sin);
-                    // 光照方向应该是从光源指向场景中心的方向
-                    const lightDir = new THREE.Vector3().subVectors(
+                    // 计算世界空间中的光照方向（从光源指向场景中心）
+                    const worldLightDir = new THREE.Vector3().subVectors(
                         new THREE.Vector3(0, 0, 0),  // 目标点（场景中心）
                         directionalLight.position     // 光源位置
                     ).normalize();
-                    material.uniforms.uLightDirection.value.copy(lightDir);
+
+                    // 转换到视图空间（使用相机的视图矩阵的法线矩阵部分）
+                    const viewLightDir = worldLightDir.clone().transformDirection(camera.matrixWorldInverse);
+
+                    material.uniforms.uLightDirection.value.copy(viewLightDir);
                 }
             });
 
