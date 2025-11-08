@@ -3,8 +3,8 @@
  */
 
 import * as THREE from 'three';
-import { globalTimer } from '../core';
-import { globalAnimationManager, Easing } from '../animation';
+import { globalTimer } from '../../core';
+import { globalAnimationManager, Easing } from '../../animation';
 
 export function runAnimationDemo(scene: THREE.Scene) {
     console.log('=== 动画库演示 ===');

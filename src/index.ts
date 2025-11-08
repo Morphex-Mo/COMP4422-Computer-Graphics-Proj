@@ -1,11 +1,11 @@
-import { startSimpleTest, startTestWithUI } from './examples/testScene';
-import { startLevel1, startLevel2, startLevel3, startLevel4 } from './examples/sceneLoaderDemo';
+import { startSimpleTest, startTestWithUI } from './scenes/examples/testScene';
+import { startLevel1, startLevel2, startLevel3, startLevel4 } from './scenes/examples/sceneLoaderDemo';
 import {
     initializeGlobalConfig,
     startSharedScene1,
     startSharedScene2,
     startSharedScene3
-} from './examples/sharedConfigDemo';
+} from './scenes/examples/sharedConfigDemo';
 import { globalTimer } from "./core";
 import { SceneSelector, SceneOption } from './ui';
 import {testSceneSelector} from "./ui/TestSceneSelectorCreator";

@@ -1,6 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 module.exports = {
     entry: './src/index.ts',
     mode: 'development',
@@ -36,6 +38,14 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: './src/index.html',
             title: 'COMP4422 Computer Graphics Project',
+        }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: 'src/assets',
+                    to: 'assets',
+                }
+            ]
         }),
         /*new BundleAnalyzerPlugin({
             analyzerMode: 'server', // 构建后会打开一个展示 bundle 的服务器窗口

@@ -2,7 +2,7 @@
  * 简单的资源加载测试示例
  */
 
-import { defineScene, createLoadingUI } from '../core';
+import { defineScene, createLoadingUI } from '../../core';
 import * as THREE from 'three';
 
 /**

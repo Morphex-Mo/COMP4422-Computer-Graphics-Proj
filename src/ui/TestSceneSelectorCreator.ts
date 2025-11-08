@@ -1,6 +1,7 @@
-import {startSharedScene1, startSharedScene2, startSharedScene3} from "../examples/sharedConfigDemo";
-import {startSimpleTest, startTestWithUI} from "../examples/testScene";
-import {startLevel1, startLevel2, startLevel3, startLevel4} from "../examples/sceneLoaderDemo";
+import {startSharedScene1, startSharedScene2, startSharedScene3} from "../scenes/examples/sharedConfigDemo";
+import {startSimpleTest, startTestWithUI} from "../scenes/examples/testScene";
+import {startLevel1, startLevel2, startLevel3, startLevel4} from "../scenes/examples/sceneLoaderDemo";
+import {startFoxScene} from "../scenes/foxScene";
 import {SceneSelector} from "./SceneSelector";
 
 // ============================================
@@ -8,6 +9,12 @@ import {SceneSelector} from "./SceneSelector";
 // ============================================
 
 export const testSceneSelector:SceneSelector = new SceneSelector([
+    {
+        id: 'fox_scene',
+        name: 'Fox Model Scene',
+        description: 'GLTF模型加载演示 - 展示一个3D狐狸模型',
+        handler: startFoxScene
+    },
     {
         id: 'simple_test',
         name: '简单测试场景',

@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/three": "^0.181.0",
+    "copy-webpack-plugin": "^13.0.1",
     "css-loader": "^6.8.1",
     "html-webpack-plugin": "^5.5.3",
     "style-loader": "^3.3.3",
