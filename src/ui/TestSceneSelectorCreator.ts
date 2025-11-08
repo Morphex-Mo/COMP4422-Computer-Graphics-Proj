@@ -1,0 +1,65 @@
+import {startSharedScene1, startSharedScene2, startSharedScene3} from "../examples/sharedConfigDemo";
+import {startSimpleTest, startTestWithUI} from "../examples/testScene";
+import {startLevel1, startLevel2, startLevel3, startLevel4} from "../examples/sceneLoaderDemo";
+import {SceneSelector} from "./SceneSelector";
+
+// ============================================
+// 创建场景选择器
+// ============================================
+
+export const testSceneSelector:SceneSelector = new SceneSelector([
+    {
+        id: 'simple_test',
+        name: '简单测试场景',
+        description: '不需要任何外部资源文件的基础测试场景',
+        handler: startSimpleTest
+    },
+    {
+        id: 'test_with_ui',
+        name: '带UI的测试场景',
+        description: '包含加载进度UI的测试场景',
+        handler: startTestWithUI
+    },
+    {
+        id: 'level1',
+        name: '第一关 - 基础场景',
+        description: '使用场景加载器加载纹理资源',
+        handler: startLevel1
+    },
+    {
+        id: 'level2',
+        name: '第二关 - 进阶场景',
+        description: '更复杂的场景配置',
+        handler: startLevel2
+    },
+    {
+        id: 'level3',
+        name: '第三关 - 高级场景',
+        description: '高级场景特性演示',
+        handler: startLevel3
+    },
+    {
+        id: 'level4',
+        name: '第四关 - 共享渲染器',
+        description: '使用共享相机和渲染器的场景',
+        handler: startLevel4
+    },
+    {
+        id: 'shared_scene_1',
+        name: '共享配置场景 1',
+        description: '共享相机/渲染器配置演示 1',
+        handler: startSharedScene1
+    },
+    {
+        id: 'shared_scene_2',
+        name: '共享配置场景 2',
+        description: '共享相机/渲染器配置演示 2',
+        handler: startSharedScene2
+    },
+    {
+        id: 'shared_scene_3',
+        name: '共享配置场景 3',
+        description: '共享相机/渲染器配置演示 3',
+        handler: startSharedScene3
+    }
+]);
