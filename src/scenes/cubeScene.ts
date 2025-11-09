@@ -393,7 +393,9 @@ export const cubeScene = defineScene({
         let showDepth = false; // 深度图显示开关（迁移位置以与交互逻辑整合）
 
         const updateSkyUniforms = () => {
-            skyboxMaterial.uniforms.sunPosition.value.copy(skyParams.sunPosition);
+            // 确保太阳位置被归一化
+            const normalizedSunPos = skyParams.sunPosition.clone().normalize();
+            skyboxMaterial.uniforms.sunPosition.value.copy(normalizedSunPos);
             skyboxMaterial.uniforms.kr.value = skyParams.kr;
             skyboxMaterial.uniforms.km.value = skyParams.km;
             skyboxMaterial.uniforms.rayleighCoef.value.copy(computeRayleigh());
@@ -406,7 +408,7 @@ export const cubeScene = defineScene({
             skyboxMaterial.uniforms.mieColor.value.copy(skyParams.mieColor);
 
             // 更新雾气散射参数
-            const sunDir = skyParams.sunPosition.clone().normalize();
+            const sunDir = normalizedSunPos.clone(); // 已经归一化了
             fogPass.uniforms.sunDirection.value.copy(sunDir);
             fogPass.uniforms.mieDistance.value = skyParams.mieDistance;
             fogPass.uniforms.kr.value = skyParams.kr;
@@ -432,8 +434,12 @@ export const cubeScene = defineScene({
             fogPass.uniforms.heightFogScatterMultiplier.value = skyParams.heightFogScatterMultiplier;
 
             // 同步方向光位置（光从太阳位置照向场景中心，因此取反向）
-            const lightPos = skyParams.sunPosition.clone().multiplyScalar(20).normalize();
+            const lightPos = normalizedSunPos.clone().multiplyScalar(20);
             directionalLight.position.copy(lightPos);
+
+            // 调试信息：输出归一化后的太阳方向
+            console.log('[Cube Scene] Sun direction (normalized):',
+                `x:${normalizedSunPos.x.toFixed(3)} y:${normalizedSunPos.y.toFixed(3)} z:${normalizedSunPos.z.toFixed(3)}`);
         };
 
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -602,6 +608,66 @@ export const cubeScene = defineScene({
                     skyParams.heightFogEnd = Math.max(skyParams.heightFogEnd - 10.0, 10.0);
                     changed = true;
                     console.log('[Cube Scene] Height Fog End -', skyParams.heightFogEnd.toFixed(1));
+                    break;
+                case 'm': // 增加 Mie Distance
+                    skyParams.mieDistance = Math.min(skyParams.mieDistance + 0.1, 2.0);
+                    changed = true;
+                    console.log('[Cube Scene] Mie Distance +', skyParams.mieDistance.toFixed(2));
+                    break;
+                case 'n': // 减少 Mie Distance
+                    skyParams.mieDistance = Math.max(skyParams.mieDistance - 0.1, 0.0);
+                    changed = true;
+                    console.log('[Cube Scene] Mie Distance -', skyParams.mieDistance.toFixed(2));
+                    break;
+                case '[': // 增加全局雾气平滑度
+                    skyParams.globalFogSmooth = Math.min(skyParams.globalFogSmooth + 0.05, 2.0);
+                    changed = true;
+                    console.log('[Cube Scene] Global Fog Smooth +', skyParams.globalFogSmooth.toFixed(2));
+                    break;
+                case ']': // 减少全局雾气平滑度
+                    skyParams.globalFogSmooth = Math.max(skyParams.globalFogSmooth - 0.05, -1.0);
+                    changed = true;
+                    console.log('[Cube Scene] Global Fog Smooth -', skyParams.globalFogSmooth.toFixed(2));
+                    break;
+                case ';': // 增加高度雾气平滑度
+                    skyParams.heightFogSmooth = Math.min(skyParams.heightFogSmooth + 0.1, 5.0);
+                    changed = true;
+                    console.log('[Cube Scene] Height Fog Smooth +', skyParams.heightFogSmooth.toFixed(2));
+                    break;
+                case "'": // 减少高度雾气平滑度
+                    skyParams.heightFogSmooth = Math.max(skyParams.heightFogSmooth - 0.1, 0.0);
+                    changed = true;
+                    console.log('[Cube Scene] Height Fog Smooth -', skyParams.heightFogSmooth.toFixed(2));
+                    break;
+                case 'o': // 增加 Mie 系数倍数
+                    skyParams.mie = Math.min(skyParams.mie + 0.1, 5.0);
+                    changed = true;
+                    console.log('[Cube Scene] Mie Multiplier +', skyParams.mie.toFixed(2));
+                    break;
+                case 'l': // 减少 Mie 系数倍数
+                    skyParams.mie = Math.max(skyParams.mie - 0.1, 0.1);
+                    changed = true;
+                    console.log('[Cube Scene] Mie Multiplier -', skyParams.mie.toFixed(2));
+                    break;
+                case 'p': // 增加 Mie 方向性因子
+                    skyParams.mieDirectionalG = Math.min(skyParams.mieDirectionalG + 0.05, 0.999);
+                    changed = true;
+                    console.log('[Cube Scene] Mie Directional G +', skyParams.mieDirectionalG.toFixed(3));
+                    break;
+                case 'v': // 减少 Mie 方向性因子
+                    skyParams.mieDirectionalG = Math.max(skyParams.mieDirectionalG - 0.05, -0.999);
+                    changed = true;
+                    console.log('[Cube Scene] Mie Directional G -', skyParams.mieDirectionalG.toFixed(3));
+                    break;
+                case 'b': // 增加雾气蓝色强度
+                    skyParams.fogBluishIntensity = Math.min(skyParams.fogBluishIntensity + 0.05, 2.0);
+                    changed = true;
+                    console.log('[Cube Scene] Fog Bluish Intensity +', skyParams.fogBluishIntensity.toFixed(2));
+                    break;
+                case 'c': // 减少雾气蓝色强度
+                    skyParams.fogBluishIntensity = Math.max(skyParams.fogBluishIntensity - 0.05, 0.0);
+                    changed = true;
+                    console.log('[Cube Scene] Fog Bluish Intensity -', skyParams.fogBluishIntensity.toFixed(2));
                     break;
                 default:
                     break;
