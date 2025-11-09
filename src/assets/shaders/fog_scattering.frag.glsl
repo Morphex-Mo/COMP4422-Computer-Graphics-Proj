@@ -75,12 +75,14 @@ void main() {
     vec3 viewDir = normalize(worldPos - cameraPos);
 
     // Azure Sky 风格的深度归一化 (Linear01Depth equivalent)
-    float depth = (cameraFar - dist) / (cameraFar - cameraNear);
+    //float depth = (cameraFar - dist) / (cameraFar - cameraNear);
+    //depth = clamp(depth, 0.0, 1.0);
+    float depth = (dist - cameraNear) / (cameraFar - cameraNear);
     depth = clamp(depth, 0.0, 1.0);
-
+    float mieDepth = clamp(mix(depth * (cameraFar / 10000.0), depth * (cameraFar / 1000.0), mieDistance), 0.0, 1.0);
     // Mie 深度计算 - Azure Sky 使用两种尺度混合
     // depth * (_ProjectionParams.z / 10000.0) 和 depth * (_ProjectionParams.z / 1000.0)
-    float mieDepth = clamp(mix(depth * (cameraFar / 10000.0), depth * (cameraFar / 1000.0), mieDistance), 0.0, 1.0);
+    //float mieDepth = clamp(mix(depth * (cameraFar / 10000.0), depth * (cameraFar / 1000.0), mieDistance), 0.0, 1.0);
 
     // 全局雾气计算 - Azure Sky 使用距离除以雾气距离
     float globalFog = smoothstep(-globalFogSmooth, 1.25, dist / globalFogDistance) * globalFogDensity;
@@ -110,7 +112,8 @@ void main() {
 
     // 光学深度 1 - 更适合日落效果 (Azure Sky: Better for sunset!)
     // zenith = acos(saturate(dot(float3(-1.0f, 1.0f, -1.0f), depth)))
-    float zenith1 = acos(clamp(dot(normalize(vec3(-1.0, 1.0, -1.0)), vec3(depth)), 0.0, 1.0));
+    //float zenith1 = acos(clamp(dot(normalize(vec3(-1.0, 1.0, -1.0)), vec3(depth)), 0.0, 1.0));
+    float zenith1 = acos(clamp(dot(normalize(vec3(-1.0, 1.0, -1.0)), viewDir), 0.0, 1.0));
     float z1 = cos(zenith1) + 0.15 * pow(93.885 - degrees(zenith1), -1.253);
     z1 = max(z1, 1e-4);
     float SR1 = kr / z1;

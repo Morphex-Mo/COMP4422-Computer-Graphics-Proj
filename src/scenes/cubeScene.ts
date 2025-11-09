@@ -53,20 +53,20 @@ export const cubeScene = defineScene({
             rayleigh: 1.5,  // Rayleigh 散射倍数
             mie: 1.0,       // Mie 散射倍数
             mieDirectionalG: 0.75, // Mie 方向性因子
-            scattering: 15.0,  // 散射强度倍数（Azure 默认）
+            scattering: 10.0,  // 散射强度倍数（Azure 默认）
             luminance: 0.1,    // 天空亮度（无太阳/月亮时）
             exposure: 2.0,     // 曝光值
             rayleighColor: new THREE.Color(1.0, 1.0, 1.0), // Rayleigh 散射颜色
             mieColor: new THREE.Color(1.0, 1.0, 1.0),      // Mie 散射颜色
             // 雾气参数（Azure Sky 尺度）
-            globalFogDistance: 1000.0,  // Azure 默认全局雾气距离
-            globalFogSmooth: 0.01,      // Azure 默认平滑过渡
-            globalFogDensity: 1.0,      // 全局雾气密度
+            globalFogDistance: 50.0,  // Azure 默认全局雾气距离
+            globalFogSmooth: 0.2,      // Azure 默认平滑过渡
+            globalFogDensity: 1,      // 全局雾气密度
             heightFogDistance: 100.0,   // 高度雾气距离
             heightFogSmooth: 1.0,       // 高度雾气平滑
             heightFogDensity: 0.0,      // 高度雾气密度
             heightFogStart: 0.0,        // 高度雾气起始高度
-            heightFogEnd: 100.0,        // 高度雾气结束高度
+            heightFogEnd: 1.0,        // 高度雾气结束高度
             fogBluishDistance: 12288.0, // Azure 默认雾气蓝色距离
             fogBluishIntensity: 0.15,   // Azure 默认雾气蓝色强度
             heightFogScatterMultiplier: 0.5, // 高度雾气散射倍数
@@ -408,6 +408,7 @@ export const cubeScene = defineScene({
             // 更新雾气散射参数
             const sunDir = skyParams.sunPosition.clone().normalize();
             fogPass.uniforms.sunDirection.value.copy(sunDir);
+            fogPass.uniforms.mieDistance.value = skyParams.mieDistance;
             fogPass.uniforms.kr.value = skyParams.kr;
             fogPass.uniforms.km.value = skyParams.km;
             fogPass.uniforms.rayleighCoef.value.copy(computeRayleigh());
@@ -452,7 +453,7 @@ export const cubeScene = defineScene({
                     console.log('[Cube Scene] Sun height ↑', skyParams.sunPosition.y.toFixed(2));
                     break;
                 case 'arrowdown': // 降低太阳高度
-                    skyParams.sunPosition.y = Math.max(skyParams.sunPosition.y - 0.05, -0.2);
+                    skyParams.sunPosition.y = Math.max(skyParams.sunPosition.y - 0.05, -1.2);
                     changed = true;
                     console.log('[Cube Scene] Sun height ↓', skyParams.sunPosition.y.toFixed(2));
                     break;
