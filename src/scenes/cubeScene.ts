@@ -55,6 +55,7 @@ export const cubeScene = defineScene({
         controls: true,
       },
     });
+
     controller.initialize();
 
     // 示例：创建立方体阵列（使用标准材质或自定义 shader）
@@ -87,7 +88,7 @@ export const cubeScene = defineScene({
     controller.attachAzureManager(azureManager);
 
     // 设置时间循环与日长，便于观察光照随时间变化（例如 1 分钟一个昼夜）
-    azureManager.time.updateConfig({ dayLength: 1.0, dawnTime: 6.0, duskTime: 18.0 });
+    azureManager.time.updateConfig({ dayLength: 0.1, dawnTime: 6.0, duskTime: 18.0 });
 
     // 渲染循环（交给 controller 内部根据 Azure 时间/天气更新太阳与光照）
     const loop = () => {

@@ -52,13 +52,18 @@ export class AtmosphereController {
   private skybox: THREE.Mesh;
   private skyboxMaterial: THREE.ShaderMaterial;
   // 基础光照强度（天气系统给出的日间强度，叠加时间昼夜衰减）
-  private baseLightIntensity: number = 0.9;
+  private baseLightIntensity: number = 1;
 
   // ---- 自定义着色材质缓存（标准立方体等） ----
   public customMaterials: THREE.ShaderMaterial[] = [];
 
   // ---- 大气参数状态 ----
   public params: AtmosphereParams;
+
+  // ---- Time/Location parameters ----
+  public latitude: number = 0; // The north-south angle of a position on the Earth's surface
+  public longitude: number = 0; // The east-west angle of a position on the Earth's surface
+  public utc: number = 0; // UTC offset
 
   // ---- Azure Manager（可选） ----
   private azureManager?: AzureManager;
@@ -515,22 +520,59 @@ export class AtmosphereController {
 
   private updateSunFromTime() {
     if (!this.azureManager) return;
-    // 使用 evaluationTime (0..24)
-    const hours = this.azureManager.time.evaluationTime;
-    // 采用全天 0..24 -> 角度 0..2PI的太阳路径，产生简单昼夜循环
-    const angle = (hours / 24) * Math.PI * 2; // 0 时刻在地平线，6h 升高，12h 再次到地平线（简化模型）
-    const y = Math.sin(angle); // -1..1 昼夜高度
-    const horiz = Math.cos(angle); // -1..1 水平半径
-    // 在 XZ 平面做环绕，保证太阳全天绕场景一周
-    const x = Math.sin(angle) * Math.cos(angle); // 简单变化
-    const z = -horiz; // 以 -Z 为初始方向
-    this.params.sunPosition.set(x, y, z);
 
-    // 根据高度调节光照强度：地平线以下衰减至 0
-    const daylightFactor = Math.max(0, y); // y<0 夜晚
-    this.directionalLight.intensity = this.baseLightIntensity * daylightFactor;
+    // Get time parameters from Azure Manager
+    const timeOfDay = this.azureManager.time.evaluationTime; // 0..24
 
-    // 更新 uniforms 与光源位置
+    // Use the same algorithm from AzureTimeSystem.cs (Simple mode)
+    // m_sunTransform.rotation = Quaternion.Euler(0.0f, m_longitude, -m_latitude) * Quaternion.Euler(((m_timeOfDay - m_utc) * 360.0f / 24.0f) - 90.0f, 180.0f, 0.0f);
+
+    // Create quaternions for the rotation
+    const latLongRotation = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(0, THREE.MathUtils.degToRad(this.longitude), THREE.MathUtils.degToRad(-this.latitude), 'YXZ')
+    );
+
+    const timeRotation = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(
+        THREE.MathUtils.degToRad(((timeOfDay - this.utc) * 360.0 / 24.0) - 90.0),
+        THREE.MathUtils.degToRad(180.0),
+        0,
+        'YXZ'
+      )
+    );
+
+    const sunRotation = latLongRotation.multiply(timeRotation);
+
+    // Get the forward direction from the rotation (in Three.js, forward is negative Z)
+    const sunForward = new THREE.Vector3(0, 0, -1).applyQuaternion(sunRotation);
+
+    // Set sun position (this is the direction the sun is shining FROM)
+    this.params.sunPosition.copy(sunForward);
+
+    // Compute sun elevation (dot product with up vector)
+    // In Unity: Vector3.Dot(-m_sunTransform.forward, Vector3.up)
+    // In Three.js: dot product of negative forward with up
+    const sunElevation = -sunForward.dot(new THREE.Vector3(0, 1, 0));
+
+    // Set directional light direction
+    // m_directionalLight.localRotation = Quaternion.LookRotation(m_sunElevation >= 0.0f ? m_sunTransform.forward : m_moonTransform.forward);
+    if (sunElevation >= 0.0) {
+      // Daytime - use sun direction
+      this.directionalLight.position.copy(sunForward.clone().multiplyScalar(20));
+
+      // Adjust light intensity based on sun elevation
+      const daylightFactor = Math.max(0, sunElevation);
+      this.directionalLight.intensity = this.baseLightIntensity;// * daylightFactor;
+    } else {
+      // Nighttime - use moon direction (opposite of sun)
+      const moonForward = sunForward.clone().negate();
+      this.directionalLight.position.copy(moonForward.clone().multiplyScalar(20));
+
+      // Low intensity for moon light
+      this.directionalLight.intensity = this.baseLightIntensity;// * 0.1;
+    }
+
+    // Update uniforms with new sun position
     this.updateAllUniforms();
   }
 

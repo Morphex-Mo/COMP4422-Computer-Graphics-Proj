@@ -19,15 +19,22 @@ uniform float custom_luminance;  // Sky luminance
 uniform float exposure;          // Exposure value
 uniform vec3 rayleighColor;      // Rayleigh color multiplier
 uniform vec3 mieColor;           // Mie color multiplier
-
+float tpow22(float inpu){
+    return exp2( log2(inpu) * (1.0 / 2.2) );
+}
 void main() {
     // Directions
     vec3 viewDir = normalize(vWorldPosition - cameraPosition);
+    //viewDir.z=-viewDir.z;
     vec3 sunDirection = normalize(sunPosition);
+    vec3 moonDirection = normalize(-sunPosition);
     float sunCosTheta = dot(viewDir, sunDirection);
+    float moonCosTheta = dot(viewDir, moonDirection);
     float skyCosTheta = dot(viewDir, vec3(0.0, -1.0, 0.0));
     float r = length(vec3(0.0, 50.0, 0.0));
     float sunRise = saturate(dot(vec3(0.0, 500.0, 0.0), sunDirection) / r);
+    float moonRise = saturate(dot(vec3(0.0, 500.0, 0.0), moonDirection) / r);
+
     float sunset = dot(vec3(0.0, 1.0, 0.0), sunDirection);
 
     // Optical depth
@@ -48,6 +55,8 @@ void main() {
     vec3 BrmTheta = BrTheta / (rayleighCoef + mieCoef);
     vec3 defaultDayLight = BrmTheta * Esun * scattering * custom_luminance * (1.0 - fex);
     defaultDayLight *= 1.0 - sunRise;
+    defaultDayLight *= 1.0 - moonRise;
+
 
     // Sun inScattering
     Esun = mix(fex, (1.0 - fex), sunset);
@@ -59,14 +68,25 @@ void main() {
     vec3 sunInScatter = BrmTheta * Esun * scattering * (1.0 - fex);
     sunInScatter *= sunRise;
 
+    // Moon inScattering
+    Esun = (1.0 - fex);
+    rayPhase = 2.0 + 0.5 * pow(moonCosTheta, 2.0);
+    miePhase = mieG.x / pow(mieG.y - mieG.z * moonCosTheta, 1.5);
+    BrTheta = Pi316 * rayleighCoef * rayPhase * rayleighColor;
+    BmTheta = Pi14 * mieCoef * miePhase * mieColor;
+    BrmTheta = (BrTheta + BmTheta) / (rayleighCoef + mieCoef);
+    vec3 moonInScatter = BrmTheta * Esun * scattering * 0.1 * (1.0 - fex);
+    moonInScatter *= moonRise;
+    moonInScatter *= 1.0 - sunRise;
     // Output
-    vec3 OutputColor = extinction + defaultDayLight + sunInScatter;
+    vec3 OutputColor = defaultDayLight + sunInScatter+moonInScatter;
 
     // Tonemapping
     OutputColor = saturate(1.0 - exp(-exposure * OutputColor));
-
-    // Color correction (gamma correction is handled by Three.js renderer)
-
     gl_FragColor = vec4(OutputColor, 1.0);
+    // Color correction (gamma correction is handled by Three.js renderer)
+    //gl_FragColor = vec4(vec3(tpow22(zenith/3.1415926)), 1.0);
+    //gl_FragColor = vec4(tpow22((viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)), 1.0);
+    //gl_FragColor = vec4(tpow22((viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)), 1.0);
 }
 
