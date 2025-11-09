@@ -49,8 +49,8 @@ export const cubeScene = defineScene({
             km: 1200.0,  // Mie 散射高度（米）
             // 波长参数（用于计算 Rayleigh 和 Mie）
             wavelength: new THREE.Vector3(680.0, 550.0, 450.0), // nm
-            molecularDensity: 2.545, // 分子密度系数
-            rayleigh: 1.5,  // Rayleigh 散射倍数
+            molecularDensity: 5.545, // 分子密度系数
+            rayleigh: 0.5,  // Rayleigh 散射倍数
             mie: 1.0,       // Mie 散射倍数
             mieDirectionalG: 0.75, // Mie 方向性因子
             scattering: 10.0,  // 散射强度倍数（Azure 默认）
@@ -60,15 +60,15 @@ export const cubeScene = defineScene({
             mieColor: new THREE.Color(1.0, 1.0, 1.0),      // Mie 散射颜色
             // 雾气参数（Azure Sky 尺度）
             globalFogDistance: 50.0,  // Azure 默认全局雾气距离
-            globalFogSmooth: 0.2,      // Azure 默认平滑过渡
+            globalFogSmooth: 0.01,      // Azure 默认平滑过渡
             globalFogDensity: 1,      // 全局雾气密度
             heightFogDistance: 100.0,   // 高度雾气距离
             heightFogSmooth: 1.0,       // 高度雾气平滑
             heightFogDensity: 0.0,      // 高度雾气密度
             heightFogStart: 0.0,        // 高度雾气起始高度
             heightFogEnd: 1.0,        // 高度雾气结束高度
-            fogBluishDistance: 12288.0, // Azure 默认雾气蓝色距离
-            fogBluishIntensity: 0.15,   // Azure 默认雾气蓝色强度
+            fogBluishDistance: 1228899.0, // Azure 默认雾气蓝色距离
+            fogBluishIntensity: 0,   // Azure 默认雾气蓝色强度
             heightFogScatterMultiplier: 0.5, // 高度雾气散射倍数
             mieDistance: 1.0            // Mie 距离控制
         };
@@ -83,7 +83,7 @@ export const cubeScene = defineScene({
             const n2 = n * n;
             const N = skyParams.molecularDensity * 1e25;
             const temp = (8.0 * Math.PI * Math.PI * Math.PI * ((n2 - 1.0) * (n2 - 1.0))) /
-                         (3.0 * N) * ((6.0 + 3.0 * pn) / (6.0 - 7.0 * pn));
+                (3.0 * N) * ((6.0 + 3.0 * pn) / (6.0 - 7.0 * pn));
 
             return new THREE.Vector3(
                 temp / Math.pow(lambda.x, 4.0),
@@ -217,7 +217,7 @@ export const cubeScene = defineScene({
                 inverseProjectionMatrix: { value: new THREE.Matrix4() },
                 inverseViewMatrix: { value: new THREE.Matrix4() },
                 sunDirection: { value: skyParams.sunPosition.clone().normalize() },
-                moonDirection: { value: new THREE.Vector3(0, -0.5, -1).normalize() },
+                moonDirection: { value: skyParams.sunPosition.clone().normalize().negate() },
                 mieDistance: { value: skyParams.mieDistance },
                 kr: { value: skyParams.kr },
                 km: { value: skyParams.km },
@@ -409,7 +409,11 @@ export const cubeScene = defineScene({
 
             // 更新雾气散射参数
             const sunDir = normalizedSunPos.clone(); // 已经归一化了
+            sunDir.z= -sunDir.z;
+            sunDir.x= -sunDir.x;
             fogPass.uniforms.sunDirection.value.copy(sunDir);
+            const moonDir = sunDir.clone().negate(); // 月亮方向为太阳方向的相反方向（180度旋转）
+            fogPass.uniforms.moonDirection.value.copy(moonDir);
             fogPass.uniforms.mieDistance.value = skyParams.mieDistance;
             fogPass.uniforms.kr.value = skyParams.kr;
             fogPass.uniforms.km.value = skyParams.km;
