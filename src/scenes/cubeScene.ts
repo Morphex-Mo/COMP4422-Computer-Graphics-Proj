@@ -83,21 +83,11 @@ export const cubeScene = defineScene({
     // （可选）挂载 Azure 时间 + 天气系统
     azureManager = new AzureManager();
     azureManager.buildDefaultSchema();
-    azureManager.buildExamplePresets();
+    //azureManager.buildExamplePresets();
     controller.attachAzureManager(azureManager);
 
     // 设置时间循环与日长，便于观察光照随时间变化（例如 1 分钟一个昼夜）
     azureManager.time.updateConfig({ dayLength: 1.0, dawnTime: 6.0, duskTime: 18.0 });
-
-    // 示例：开始一个天气过渡（2 秒后切到 Overcast）
-    setTimeout(() => {
-      controller?.applyWeatherPreset(1); // Overcast
-    }, 2000);
-
-    // 示例：10 秒后再切到 Storm
-    setTimeout(() => {
-      controller?.applyWeatherPreset(2); // Storm
-    }, 10000);
 
     // 渲染循环（交给 controller 内部根据 Azure 时间/天气更新太阳与光照）
     const loop = () => {

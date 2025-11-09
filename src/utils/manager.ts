@@ -105,7 +105,7 @@ export class AzureManager {
             makeFloat("HeightFogDensity", 0.0),
             makeFloat("FogBluishDistance", 12288.0),
             makeFloat("FogBluishIntensity", 0.15),
-            makeFloat("HeightFogScatterMultiplier", 0.5),
+            HeightFogScatterMultiplier, // use Curve here
             makeFloat("MieDistance", 1.0),
         );
 
@@ -144,6 +144,9 @@ export class AzureManager {
         light.weatherPropertyList.push(lightIntensity, lightColor);
 
         this.weather.weatherPropertyGroupList = [scattering, fog, light];
+        // 构建一个默认预设用于立即评估（支持 Curve / Gradient 新类型）
+        const defaultPreset = WeatherPreset.createFromSchema(this.weather.weatherPropertyGroupList, "Default");
+        this.weather.currentWeatherPreset = defaultPreset;
     }
     /*
     buildExamplePresets() {

@@ -116,33 +116,45 @@ export class WeatherSystem {
   private evaluateCurrentWeather() {
     const from = this.currentWeatherPreset;
     if (!from) return;
+    // 兼容：确保 evaluationTime 在 0..24，gradient 使用 0..1
+    const hourT = Math.min(24, Math.max(0, this.evaluationTime));
+    const gradT = Math.min(1, Math.max(0, this.evaluationTimeGradient));
     for (let gi = 0; gi < this.weatherPropertyGroupList.length; gi++) {
       const group = this.weatherPropertyGroupList[gi];
       if (!group.isEnabled) continue;
       const props = group.weatherPropertyList;
       const data = from.propertyGroupDataList[gi];
-      //console.log(data);
-      //debugger;
+      //console.log(props,data);
       for (let pi = 0; pi < props.length; pi++) {
         const prop = props[pi];
         switch (prop.propertyType) {
-          case WeatherPropertyType.Float:
+          case WeatherPropertyType.Float: {
+            // 原生 float
             prop.floatOutput = data.floatData[pi];
             break;
-          case WeatherPropertyType.Color:
+          }
+          case WeatherPropertyType.Color: {
+            // 原生 color
             prop.colorOutput = data.colorData[pi];
             break;
-          case WeatherPropertyType.Curve:
-            prop.floatOutput = data.curveData[pi].evaluate(this.evaluationTime);
+          }
+          case WeatherPropertyType.Curve: {
+            // 优先曲线；若占位为空则用 floatData
+            const curve = data.curveData[pi];
+            prop.floatOutput = curve.evaluate(hourT);
             break;
-          case WeatherPropertyType.Gradient:
-            prop.colorOutput = data.gradientData?.[pi]?.evaluate
-              ? data.gradientData[pi].evaluate(this.evaluationTimeGradient)
-              : data.colorData[pi]; // 简化：若未赋值 gradient，用 colorData 兜底
+          }
+          case WeatherPropertyType.Gradient: {
+            // 优先 gradient；若缺失则用 colorData
+            const grad = data.gradientData[pi];
+            prop.colorOutput = grad.evaluate(gradT);
+            //console.log(prop.colorOutput,pi);
             break;
-          case WeatherPropertyType.Vector3:
+          }
+          case WeatherPropertyType.Vector3: {
             prop.vector3Output = data.vector3Data[pi];
             break;
+          }
         }
       }
     }
@@ -150,46 +162,42 @@ export class WeatherSystem {
 
   private evaluateGlobalWeatherTransition(from: WeatherPreset | null, to: WeatherPreset | null, t: number) {
     if (!from || !to) return;
-
+    const hourT = Math.min(24, Math.max(0, this.evaluationTime));
+    const gradT = Math.min(1, Math.max(0, this.evaluationTimeGradient));
     for (let gi = 0; gi < this.weatherPropertyGroupList.length; gi++) {
       const group = this.weatherPropertyGroupList[gi];
       if (!group.isEnabled) continue;
-
       const ramp = to.propertyGroupDataList[gi].rampCurve.evaluate(t);
       const props = group.weatherPropertyList;
-
       for (let pi = 0; pi < props.length; pi++) {
         const prop = props[pi];
         const fData = from.propertyGroupDataList[gi];
         const tData = to.propertyGroupDataList[gi];
-
         switch (prop.propertyType) {
-          case WeatherPropertyType.Float:
+          case WeatherPropertyType.Float: {
             prop.floatOutput = lerp(fData.floatData[pi], tData.floatData[pi], ramp);
             break;
-          case WeatherPropertyType.Color:
+          }
+          case WeatherPropertyType.Color: {
             prop.colorOutput = lerpColor(fData.colorData[pi], tData.colorData[pi], ramp);
             break;
-          case WeatherPropertyType.Curve:
-            prop.floatOutput = lerp(
-              fData.curveData[pi].evaluate(this.evaluationTime),
-              tData.curveData[pi].evaluate(this.evaluationTime),
-              ramp
-            );
-            break;
-          case WeatherPropertyType.Gradient: {
-            const fcol = fData.gradientData?.[pi]?.evaluate
-              ? fData.gradientData[pi].evaluate(this.evaluationTimeGradient)
-              : fData.colorData[pi];
-            const tcol = tData.gradientData?.[pi]?.evaluate
-              ? tData.gradientData[pi].evaluate(this.evaluationTimeGradient)
-              : tData.colorData[pi];
-            prop.colorOutput = lerpColor(fcol, tcol, ramp);
+          }
+          case WeatherPropertyType.Curve: {
+            const fVal = fData.curveData[pi]?.evaluate ? fData.curveData[pi].evaluate(hourT) : fData.floatData[pi];
+            const tVal = tData.curveData[pi]?.evaluate ? tData.curveData[pi].evaluate(hourT) : tData.floatData[pi];
+            prop.floatOutput = lerp(fVal, tVal, ramp);
             break;
           }
-          case WeatherPropertyType.Vector3:
+          case WeatherPropertyType.Gradient: {
+            const fCol = fData.gradientData[pi]?.evaluate ? fData.gradientData[pi].evaluate(gradT) : fData.colorData[pi];
+            const tCol = tData.gradientData[pi]?.evaluate ? tData.gradientData[pi].evaluate(gradT) : tData.colorData[pi];
+            prop.colorOutput = lerpColor(fCol, tCol, ramp);
+            break;
+          }
+          case WeatherPropertyType.Vector3: {
             prop.vector3Output = lerpVec3(fData.vector3Data[pi], tData.vector3Data[pi], ramp);
             break;
+          }
         }
       }
     }

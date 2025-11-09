@@ -187,7 +187,7 @@ export const cubeSceneWithConfig = defineScene({
     azureManager.buildDefaultSchema();
 
     // 3. 构建内置预设（Clear, Overcast, Storm）
-    azureManager.buildExamplePresets();
+    //azureManager.buildExamplePresets();
 
     // 4. 创建自定义预设（Sunset, FoggyForest, Sandstorm）
     createCustomPresets(azureManager);
