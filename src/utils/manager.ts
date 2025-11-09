@@ -5,6 +5,8 @@ import { WeatherPropertyGroup } from "./weather-property-group";
 import { WeatherProperty } from "./weather-property";
 import { WeatherPreset } from "./weather-preset";
 import { WeatherPropertyType } from "./types";
+import {AnimationCurve} from "./animation-curve";
+import {Gradient} from "./gradient";
 
 export class AzureManager {
     readonly time = new TimeSystem();
@@ -22,23 +24,52 @@ export class AzureManager {
 
         const rayleigh = new WeatherProperty();
         rayleigh.name = "RayleighMultiplier";
-        rayleigh.propertyType = WeatherPropertyType.Float;
-        rayleigh.defaultFloatValue = 1.5;
+        rayleigh.propertyType = WeatherPropertyType.Curve;
+        rayleigh.defaultCurveValue = new AnimationCurve([
+            { time: 0, value: 2 },
+            { time: 24, value:0.5 }
+        ]);
 
         const mie = new WeatherProperty();
         mie.name = "MieMultiplier";
-        mie.propertyType = WeatherPropertyType.Float;
-        mie.defaultFloatValue = 1.0;
+        mie.propertyType = WeatherPropertyType.Curve;
+        mie.defaultCurveValue = new AnimationCurve([
+            { time: 0, value: 2 },
+            { time: 4.9, value: 2 },
+            { time: 6, value: 0.5 },
+            { time: 18, value: 0.5 },
+            { time: 18.9, value: 2 },
+            { time: 24, value:2 }
+        ]);
 
         const rayleighColor = new WeatherProperty();
         rayleighColor.name = "RayleighColor";
-        rayleighColor.propertyType = WeatherPropertyType.Color;
-        rayleighColor.defaultColorValue = { r: 1, g: 1, b: 1, a: 1 };
+        rayleighColor.propertyType = WeatherPropertyType.Gradient;
+        rayleighColor.defaultGradientValue = new Gradient([
+            { time: 0, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+            { time: 0.2, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+            { time: 0.25, color: { r: 0.6102941, g: 0.8226167, b: 1, a: 1 } },
+            { time: 0.35, color: { r: 1, g: 1, b: 1, a: 1 } },
+            { time: 0.65, color: { r: 1, g: 1, b: 1, a: 1 } },
+            { time: 1-0.25, color: { r: 0.6102941, g: 0.8226167, b: 1, a: 1 } },
+            { time: 1-0.2, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+            { time: 1, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+        ]);
 
         const mieColor = new WeatherProperty();
         mieColor.name = "MieColor";
-        mieColor.propertyType = WeatherPropertyType.Color;
-        mieColor.defaultColorValue = { r: 1, g: 1, b: 1, a: 1 };
+        mieColor.propertyType = WeatherPropertyType.Gradient;
+        mieColor.defaultGradientValue = new Gradient([
+            { time: 0, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+            { time: 0.25, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+            { time: 0.255, color: { r: 0.9622642, g: 0.718456, b: 0.3222677, a: 1 } },
+            { time: 0.30, color: { r: 0.9622642, g: 0.718456, b: 0.3222677, a: 1 } },
+            { time: 0.50, color: { r: 1, g: 1, b: 1, a: 1 } },
+            { time: 1-0.30, color: { r: 0.9622642, g: 0.718456, b: 0.3222677, a: 1 } },
+            { time: 1-0.255, color: { r: 0.9622642, g: 0.718456, b: 0.3222677, a: 1 } },
+            { time: 1-0.25, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+            { time: 1, color: { r: 0.25, g: 0.6586208, b: 1, a: 1 } },
+        ]);
 
         scattering.weatherPropertyList.push(molecularDensity, rayleigh, mie, rayleighColor, mieColor);
 
@@ -52,6 +83,19 @@ export class AzureManager {
             p.defaultFloatValue = def;
             return p;
         };
+        const HeightFogScatterMultiplier = new WeatherProperty();
+        HeightFogScatterMultiplier.name = "HeightFogScatterMultiplier";
+        HeightFogScatterMultiplier.propertyType = WeatherPropertyType.Curve;
+        HeightFogScatterMultiplier.defaultCurveValue = new AnimationCurve([
+            { time: 0, value: 0.025 },
+            { time: 6, value: 0.025 },
+            { time: 7, value: 0.1 },
+            { time: 10, value: 0.5 },
+            { time: 24-10, value: 0.5 },
+            { time: 24-7, value: 0.1 },
+            { time: 24-6, value: 0.025 },
+            { time: 0, value: 0.025 },
+        ]);
         fog.weatherPropertyList.push(
             makeFloat("GlobalFogDistance", 1000),
             makeFloat("GlobalFogSmooth", 0.25),
@@ -71,19 +115,37 @@ export class AzureManager {
 
         const lightIntensity = new WeatherProperty();
         lightIntensity.name = "LightIntensity";
-        lightIntensity.propertyType = WeatherPropertyType.Float;
-        lightIntensity.defaultFloatValue = 0.9;
+        lightIntensity.propertyType = WeatherPropertyType.Curve;
+        lightIntensity.defaultCurveValue = new AnimationCurve([
+            { time: 0, value: 0.35 },
+            { time: 5.5, value: 0.35 },
+            { time: 6, value: 0.1 },
+            { time: 6.5, value: 1 },
+            { time: 24-6.5, value: 1 },
+            { time: 24-6, value: 0.1 },
+            { time: 24-5.5, value: 0.35 },
+            { time: 24-0, value: 0.35 },
+        ]);
 
         const lightColor = new WeatherProperty();
         lightColor.name = "LightColor";
-        lightColor.propertyType = WeatherPropertyType.Color;
-        lightColor.defaultColorValue = { r: 1, g: 1, b: 1, a: 1 };
+        lightColor.propertyType = WeatherPropertyType.Gradient;
+        lightColor.defaultGradientValue=new Gradient([
+            { time: 0, color: { r: 0.1607843, g: 0.2784314, b: 0.4627451, a: 1 } },
+            { time: 0.225, color: { r: 0.1607843, g: 0.2784314, b: 0.4627451, a: 1 } },
+            { time: 0.27, color: { r: 1, g: 0.5172414, b: 0, a: 1 } },
+            { time: 0.37, color: { r: 1, g: 1, b: 1, a: 1 } },
+            { time: 1-0.37, color: { r: 1, g: 1, b: 1, a: 1 } },
+            { time: 1-0.27, color: { r: 1, g: 0.5172414, b: 0, a: 1 } },
+            { time: 1-0.225, color: { r: 0.1607843, g: 0.2784314, b: 0.4627451, a: 1 } },
+            { time: 1-0, color: { r: 0.1607843, g: 0.2784314, b: 0.4627451, a: 1 } },
+        ]);
 
         light.weatherPropertyList.push(lightIntensity, lightColor);
 
         this.weather.weatherPropertyGroupList = [scattering, fog, light];
     }
-
+    /*
     buildExamplePresets() {
         const schema = this.weather.weatherPropertyGroupList;
 
@@ -175,7 +237,7 @@ export class AzureManager {
             new GlobalWeatherEntry(storm, 15),
         ];
     }
-
+    */
     private _startTimeSec = performance.now() / 1000;
     private _lastTimeSec = this._startTimeSec;
 

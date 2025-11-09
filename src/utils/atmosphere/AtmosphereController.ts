@@ -51,6 +51,8 @@ export class AtmosphereController {
   public ambientLight: THREE.AmbientLight;
   private skybox: THREE.Mesh;
   private skyboxMaterial: THREE.ShaderMaterial;
+  // 基础光照强度（天气系统给出的日间强度，叠加时间昼夜衰减）
+  private baseLightIntensity: number = 0.9;
 
   // ---- 自定义着色材质缓存（标准立方体等） ----
   public customMaterials: THREE.ShaderMaterial[] = [];
@@ -143,6 +145,7 @@ export class AtmosphereController {
     this.scene.add(this.ambientLight);
 
     this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    this.baseLightIntensity = this.directionalLight.intensity;
     this.directionalLight.castShadow = true;
     this.directionalLight.shadow.mapSize.set(2048, 2048);
     this.scene.add(this.directionalLight);
@@ -170,7 +173,7 @@ export class AtmosphereController {
     if (this.options.enableDepthDebug && this.shaders.depthVertex && this.shaders.depthFragment) {
       this.buildDepthPass();
     }
-    this.updateAllUniforms(true);
+    this.updateAllUniforms();
   }
 
   attachAzureManager(manager: AzureManager) {
@@ -186,8 +189,7 @@ export class AtmosphereController {
     } else {
       // 没有时间系统时可直接根据 hours 调太阳高度
       // 简单映射：-1..1 -> y
-      const elevation = Math.sin((hours / 24) * Math.PI * 2);
-      this.params.sunPosition.y = elevation;
+      this.params.sunPosition.y = Math.sin((hours / 24) * Math.PI * 2);
       this.updateSunDirection();
       this.updateAllUniforms();
     }
@@ -207,7 +209,6 @@ export class AtmosphereController {
 
   setSunAngles(elevationRadians: number, azimuthRadians: number) {
     // 将球坐标转换到向量（Z 指向 -1 初始）
-    const r = 1;
     const y = Math.sin(elevationRadians);
     const horiz = Math.cos(elevationRadians);
     const x = horiz * Math.sin(azimuthRadians);
@@ -258,9 +259,11 @@ export class AtmosphereController {
         // 从 weather schema 拿值映射到 params
         this.pullFromWeatherSystem();
       }
+      // 根据时间系统评估的小时更新太阳方向与强度
+      this.updateSunFromTime();
     }
 
-    // 渲染前更新矩阵与 uniforms
+    // 渲染前更新矩阵与 uniforms（updateSunFromTime 已调用 updateAllUniforms，这里仍需矩阵与深度）
     this.updateFogMatrices();
     this.renderDepthTexture();
     this.updateCustomMaterialsLighting();
@@ -387,7 +390,7 @@ export class AtmosphereController {
   }
 
   // ---- Uniform 更新 ----
-  private updateAllUniforms(force = false) {
+  private updateAllUniforms() {
     // Skybox
     const normalizedSun = this.params.sunPosition.clone().normalize();
     const mieG = computeMieG(this.params);
@@ -474,22 +477,17 @@ export class AtmosphereController {
         if (!this.azureManager) return;
         const groups = this.azureManager.weather.weatherPropertyGroupList;
         if (groups.length < 3) return;
-
         // Scattering
         {
             const sc = groups[0].weatherPropertyList;
             this.params.molecularDensity = sc[0].floatOutput;
             this.params.rayleigh = sc[1].floatOutput;
             this.params.mie = sc[2].floatOutput;
-
-            // 容错：若 colorOutput 未被正确写入，回落到当前 params 颜色
             const rc = sc[3]?.colorOutput ?? { r: this.params.rayleighColor.r, g: this.params.rayleighColor.g, b: this.params.rayleighColor.b };
             const mc = sc[4]?.colorOutput ?? { r: this.params.mieColor.r, g: this.params.mieColor.g, b: this.params.mieColor.b };
-
             this.params.rayleighColor.setRGB(rc.r, rc.g, rc.b);
             this.params.mieColor.setRGB(mc.r, mc.g, mc.b);
         }
-
         // Fog
         {
             const fg = groups[1].weatherPropertyList;
@@ -504,17 +502,37 @@ export class AtmosphereController {
             this.params.heightFogScatterMultiplier = fg[8].floatOutput;
             this.params.mieDistance = fg[9].floatOutput;
         }
-
-        // Directional Light
+        // Directional Light (保存天气强度作为白天基准)
         {
             const lg = groups[2].weatherPropertyList;
-            this.directionalLight.intensity = lg[0].floatOutput;
+            this.baseLightIntensity = lg[0].floatOutput; // 不立即赋值到 light，交由时间昼夜函数处理
             const lc = lg[1]?.colorOutput ?? { r: this.directionalLight.color.r, g: this.directionalLight.color.g, b: this.directionalLight.color.b };
             this.directionalLight.color.setRGB(lc.r, lc.g, lc.b);
         }
-
+        // 天气属性改变会影响散射与雾，需要刷新
         this.updateAllUniforms();
     }
+
+  private updateSunFromTime() {
+    if (!this.azureManager) return;
+    // 使用 evaluationTime (0..24)
+    const hours = this.azureManager.time.evaluationTime;
+    // 采用全天 0..24 -> 角度 0..2PI的太阳路径，产生简单昼夜循环
+    const angle = (hours / 24) * Math.PI * 2; // 0 时刻在地平线，6h 升高，12h 再次到地平线（简化模型）
+    const y = Math.sin(angle); // -1..1 昼夜高度
+    const horiz = Math.cos(angle); // -1..1 水平半径
+    // 在 XZ 平面做环绕，保证太阳全天绕场景一周
+    const x = Math.sin(angle) * Math.cos(angle); // 简单变化
+    const z = -horiz; // 以 -Z 为初始方向
+    this.params.sunPosition.set(x, y, z);
+
+    // 根据高度调节光照强度：地平线以下衰减至 0
+    const daylightFactor = Math.max(0, y); // y<0 夜晚
+    this.directionalLight.intensity = this.baseLightIntensity * daylightFactor;
+
+    // 更新 uniforms 与光源位置
+    this.updateAllUniforms();
+  }
 
   // ---- 事件处理 ----
   private handleResize = () => {
