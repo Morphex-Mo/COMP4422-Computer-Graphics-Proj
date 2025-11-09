@@ -60,7 +60,7 @@ export const cubeScene = defineScene({
             mieColor: new THREE.Color(1.0, 1.0, 1.0),      // Mie 散射颜色
             // 雾气参数（Azure Sky 尺度）
             globalFogDistance: 1000.0,  // Azure 默认全局雾气距离
-            globalFogSmooth: 0.25,      // Azure 默认平滑过渡
+            globalFogSmooth: 0.01,      // Azure 默认平滑过渡
             globalFogDensity: 1.0,      // 全局雾气密度
             heightFogDistance: 100.0,   // 高度雾气距离
             heightFogSmooth: 1.0,       // 高度雾气平滑
