@@ -2,7 +2,7 @@
 
 ## 修改内容
 
-### 1. cubeScene.ts - 参数调整
+### 1. cubeScenebc2.ts - 参数调整
 
 **旧参数（错误的尺度）：**
 - `rayleigh`: 2.0 (无意义的倍数)
