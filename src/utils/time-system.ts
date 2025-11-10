@@ -62,14 +62,14 @@ export class TimeSystem {
 
     if (this.timeDirection === TimeDirection.Forward) {
       this.timeline += this.timeProgressionStep * deltaTimeSeconds;
-      if (this.timeline > 24) {
-        this.timeline = 0;
+      if (this.timeline >= 24) {
+        this.timeline = this.timeline % 24;
         AzureEvents.emitDayChanged();
       }
     } else {
       this.timeline -= this.timeProgressionStep * deltaTimeSeconds;
       if (this.timeline < 0) {
-        this.timeline = 24;
+        this.timeline = 24 + (this.timeline % 24);
         AzureEvents.emitDayChanged();
       }
     }

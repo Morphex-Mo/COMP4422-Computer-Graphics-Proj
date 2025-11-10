@@ -26,8 +26,8 @@ export class AzureManager {
         rayleigh.name = "RayleighMultiplier";
         rayleigh.propertyType = WeatherPropertyType.Curve;
         rayleigh.defaultCurveValue = new AnimationCurve([
-            { time: 0, value: 2 },
-            { time: 24, value:0.5 }
+            { time: 0, value: 0.5 },
+            { time: 24, value: 0.5 }
         ]);
 
         const mie = new WeatherProperty();
@@ -94,7 +94,7 @@ export class AzureManager {
             { time: 24-10, value: 0.5 },
             { time: 24-7, value: 0.1 },
             { time: 24-6, value: 0.025 },
-            { time: 0, value: 0.025 },
+            { time: 24, value: 0.025 },
         ]);
         fog.weatherPropertyList.push(
             makeFloat("GlobalFogDistance", 1000),
@@ -124,7 +124,7 @@ export class AzureManager {
             { time: 24-6.5, value: 1 },
             { time: 24-6, value: 0.1 },
             { time: 24-5.5, value: 0.35 },
-            { time: 24-0, value: 0.35 },
+            { time: 24, value: 0.35 },
         ]);
 
         const lightColor = new WeatherProperty();
@@ -138,7 +138,7 @@ export class AzureManager {
             { time: 1-0.37, color: { r: 1, g: 1, b: 1, a: 1 } },
             { time: 1-0.27, color: { r: 1, g: 0.5172414, b: 0, a: 1 } },
             { time: 1-0.225, color: { r: 0.1607843, g: 0.2784314, b: 0.4627451, a: 1 } },
-            { time: 1-0, color: { r: 0.1607843, g: 0.2784314, b: 0.4627451, a: 1 } },
+            { time: 1, color: { r: 0.1607843, g: 0.2784314, b: 0.4627451, a: 1 } },
         ]);
 
         light.weatherPropertyList.push(lightIntensity, lightColor);
