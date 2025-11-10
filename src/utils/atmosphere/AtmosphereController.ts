@@ -443,7 +443,7 @@ export class AtmosphereController {
     fU.heightFogScatterMultiplier.value = this.params.heightFogScatterMultiplier;
 
     // Light (位置根据 sun)
-    this.directionalLight.position.copy(normalizedSun.clone().multiplyScalar(20));
+    //this.directionalLight.position.copy(normalizedSun.clone().multiplyScalar(20));
   }
 
   private transformSunForFog(dir: THREE.Vector3): THREE.Vector3 {
@@ -552,10 +552,11 @@ export class AtmosphereController {
     // Compute sun elevation (dot product with up vector)
     // In Unity: Vector3.Dot(-m_sunTransform.forward, Vector3.up)
     // In Three.js: dot product of negative forward with up
-    const sunElevation = -sunForward.dot(new THREE.Vector3(0, 1, 0));
+    const sunElevation = sunForward.dot(new THREE.Vector3(0, 1, 0));
 
     // Set directional light direction
     // m_directionalLight.localRotation = Quaternion.LookRotation(m_sunElevation >= 0.0f ? m_sunTransform.forward : m_moonTransform.forward);
+
     if (sunElevation >= 0.0) {
       // Daytime - use sun direction
       this.directionalLight.position.copy(sunForward.clone().multiplyScalar(20));
@@ -567,7 +568,7 @@ export class AtmosphereController {
       // Nighttime - use moon direction (opposite of sun)
       const moonForward = sunForward.clone().negate();
       this.directionalLight.position.copy(moonForward.clone().multiplyScalar(20));
-
+        //console.log(this.baseLightIntensity,this.directionalLight.color);
       // Low intensity for moon light
       this.directionalLight.intensity = this.baseLightIntensity;// * 0.1;
     }

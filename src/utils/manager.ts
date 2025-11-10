@@ -4,14 +4,19 @@ import { WeatherSystem, GlobalWeatherEntry } from "./weather-system";
 import { WeatherPropertyGroup } from "./weather-property-group";
 import { WeatherProperty } from "./weather-property";
 import { WeatherPreset } from "./weather-preset";
-import { WeatherPropertyType } from "./types";
+import {CurveKey, WeatherPropertyType} from "./types";
 import {AnimationCurve} from "./animation-curve";
 import {Gradient} from "./gradient";
 
 export class AzureManager {
     readonly time = new TimeSystem();
     readonly weather = new WeatherSystem();
-
+    buildUnityIntensity(a:CurveKey[]):AnimationCurve{
+        for(let k of a){
+            k.value=Math.pow(k.value,1/3.2);
+        }
+        return new AnimationCurve(a);
+    }
     buildDefaultSchema() {
         const scattering = new WeatherPropertyGroup();
         scattering.name = "Scattering";
@@ -20,7 +25,7 @@ export class AzureManager {
         const molecularDensity = new WeatherProperty();
         molecularDensity.name = "MolecularDensity";
         molecularDensity.propertyType = WeatherPropertyType.Float;
-        molecularDensity.defaultFloatValue = 2.545;
+        molecularDensity.defaultFloatValue = 0.5;
 
         const rayleigh = new WeatherProperty();
         rayleigh.name = "RayleighMultiplier";
@@ -97,16 +102,16 @@ export class AzureManager {
             { time: 24, value: 0.025 },
         ]);
         fog.weatherPropertyList.push(
-            makeFloat("GlobalFogDistance", 1000),
+            makeFloat("GlobalFogDistance", 1500),
             makeFloat("GlobalFogSmooth", 0.25),
             makeFloat("GlobalFogDensity", 1.0),
             makeFloat("HeightFogDistance", 100.0),
-            makeFloat("HeightFogSmooth", 1.0),
-            makeFloat("HeightFogDensity", 0.0),
+            makeFloat("HeightFogSmooth", 0.5),
+            makeFloat("HeightFogDensity", 0.5),
             makeFloat("FogBluishDistance", 12288.0),
             makeFloat("FogBluishIntensity", 0.15),
             HeightFogScatterMultiplier, // use Curve here
-            makeFloat("MieDistance", 1.0),
+            makeFloat("MieDistance", 0.5),
         );
 
         const light = new WeatherPropertyGroup();
@@ -116,7 +121,7 @@ export class AzureManager {
         const lightIntensity = new WeatherProperty();
         lightIntensity.name = "LightIntensity";
         lightIntensity.propertyType = WeatherPropertyType.Curve;
-        lightIntensity.defaultCurveValue = new AnimationCurve([
+        lightIntensity.defaultCurveValue = this.buildUnityIntensity([
             { time: 0, value: 0.35 },
             { time: 5.5, value: 0.35 },
             { time: 6, value: 0.1 },
@@ -147,6 +152,7 @@ export class AzureManager {
         // 构建一个默认预设用于立即评估（支持 Curve / Gradient 新类型）
         const defaultPreset = WeatherPreset.createFromSchema(this.weather.weatherPropertyGroupList, "Default");
         this.weather.currentWeatherPreset = defaultPreset;
+        this.weather.globalWeatherList.push(new GlobalWeatherEntry(defaultPreset,3));
     }
     /*
     buildExamplePresets() {
