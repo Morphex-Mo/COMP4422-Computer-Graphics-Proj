@@ -44,7 +44,9 @@ vec3 getViewRayVS(vec2 uv) {
     vec3 rayVS = rayVS4.xyz / rayVS4.w;
     return normalize(rayVS);
 }
-
+vec3 tpow22(vec3 inpu){
+    return exp2( log2(inpu) * (1.0 / 2.2) );
+}
 vec3 getWorldPositionFromDepth(float depth, vec2 uv) {
     float viewZ = perspectiveDepthToViewZ(depth, cameraNear, cameraFar);
     vec3 rayVS = getViewRayVS(uv);

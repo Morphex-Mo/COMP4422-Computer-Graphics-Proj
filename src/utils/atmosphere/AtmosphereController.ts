@@ -372,6 +372,8 @@ export class AtmosphereController {
       fragmentShader: this.shaders.fogFragment,
     };
     this.fogPass = new ShaderPass(fogShader);
+    //不知道为什么总之就是要手动设置这个
+    this.fogPass.uniforms['tDepth'].value = this.depthRenderTarget.depthTexture;
     this.fogPass.renderToScreen = true;
     this.composer.addPass(this.fogPass);
   }
@@ -461,10 +463,12 @@ export class AtmosphereController {
   }
 
   private renderDepthTexture() {
+
     this.renderer.setRenderTarget(this.depthRenderTarget);
     this.renderer.clear();
     this.renderer.render(this.scene, this.camera);
     this.renderer.setRenderTarget(null);
+
   }
 
   private updateCustomMaterialsLighting() {

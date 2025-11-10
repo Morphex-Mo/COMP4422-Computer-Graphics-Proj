@@ -121,7 +121,7 @@ export const buildingPresets = (manager:AzureManager)=>{
         { time: 24, value: 0.025 },
     ]);
     fog.weatherPropertyList.push(
-        makeFloat("GlobalFogDistance", 100),
+        makeFloat("GlobalFogDistance", 50),
         makeFloat("GlobalFogSmooth", 0.35),
         makeFloat("GlobalFogDensity", 1.0),
         makeFloat("HeightFogDistance", 100.0),

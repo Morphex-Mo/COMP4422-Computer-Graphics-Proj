@@ -89,8 +89,8 @@ export const cubeScene = defineScene({
     buildingPresets(azureManager);
     azureManager.weather.currentWeatherPreset = azureManager.weather.globalWeatherList[1].preset!;
     // 设置时间循环与日长，便于观察光照随时间变化（例如 1 分钟一个昼夜）
-    azureManager.time.updateConfig({ dayLength: 0, dawnTime: 6.0, duskTime: 18.0 });
-    azureManager.time.setTime(7);
+    azureManager.time.updateConfig({ dayLength: 0.5, dawnTime: 6.0, duskTime: 18.0 });
+    azureManager.time.setTime(6.5);
     // 渲染循环（交给 controller 内部根据 Azure 时间/天气更新太阳与光照）
     const loop = () => {
       animationId = requestAnimationFrame(loop);
