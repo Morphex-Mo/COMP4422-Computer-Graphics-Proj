@@ -267,13 +267,11 @@ export class AtmosphereController {
       // 根据时间系统评估的小时更新太阳方向与强度
       this.updateSunFromTime();
     }
-
+    if (this.controls) this.controls.update();
     // 渲染前更新矩阵与 uniforms（updateSunFromTime 已调用 updateAllUniforms，这里仍需矩阵与深度）
     this.updateFogMatrices();
     this.renderDepthTexture();
     this.updateCustomMaterialsLighting();
-
-    if (this.controls) this.controls.update();
     this.composer.render();
   }
 
