@@ -4,6 +4,7 @@ import {startLevel1, startLevel2, startLevel3, startLevel4} from "../scenes/exam
 import {startFoxScene} from "../scenes/foxScene";
 import {startCubeScene} from "../scenes/cubeScene";
 import {startCubeSceneWithConfig} from "../scenes/cubeSceneWithConfig";
+import {startStarryNightScene} from "../scenes/starryNightScene";
 import {SceneSelector} from "./SceneSelector";
 
 // ============================================
@@ -11,6 +12,12 @@ import {SceneSelector} from "./SceneSelector";
 // ============================================
 
 export const testSceneSelector:SceneSelector = new SceneSelector([
+    {
+        id: 'starry_night_scene',
+        name: '🌟 Starry Night Scene',
+        description: '星空效果演示 - 8000颗星星闪烁动画，支持键盘交互控制',
+        handler: startStarryNightScene
+    },
     {
         id: 'cube_scene2',
         name: 'Cube Scene2 (Skybox + Fog)',

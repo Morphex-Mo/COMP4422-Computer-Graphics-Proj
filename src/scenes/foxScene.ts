@@ -214,15 +214,13 @@ export const foxScene = defineScene({
                 clock = new THREE.Clock();
             }
 
-
-
             // 添加两个球体代替手部，方便观察效果
             const leftHandBone = fox.getObjectByName('LeftHand') || fox.getObjectByName('mixamorigLeftHand');
             const rightHandBone = fox.getObjectByName('RightHand') || fox.getObjectByName('mixamorigRightHand');
 
             const sphereGeometry = new THREE.SphereGeometry(0.15, 32, 32);
 
-// 使用自定义 Toon Shader 材质
+            // 使用自定义 Toon Shader 材质
             const leftToonMaterial = new THREE.ShaderMaterial({
                 uniforms: THREE.UniformsUtils.clone({
                     ...THREE.UniformsLib.common,
@@ -281,13 +279,6 @@ export const foxScene = defineScene({
                 console.log('[Fox Scene] Right hand bone not found, sphere placed at right position');
             }
 
-
-
-
-
-
-
-
         } else {
             console.error('[Fox Scene] Failed to load fox model');
         }
@@ -325,7 +316,7 @@ export const foxScene = defineScene({
             }
 
             // ✅ 修复：更新光照方向（转换到视图空间，使光照不随相机旋转）
-            let time = Date.now() * 0.001; // 时间单位：秒
+            const time = Date.now() * 0.001;
             let cos = Math.cos(time);
             let sin = Math.sin(time);
             directionalLight.position.set(cos * 5, 5, sin * 5);
