@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Morphex-Mo/COMP4422-Computer-Graphics-Proj#readme",
   "dependencies": {
+    "noisejs": "^2.1.0",
     "three": "^0.181.0"
   },
   "devDependencies": {

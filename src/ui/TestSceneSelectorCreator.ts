@@ -5,6 +5,7 @@ import {startFoxScene} from "../scenes/foxScene";
 import {startCubeScene} from "../scenes/cubeScene";
 import {startCubeSceneWithConfig} from "../scenes/cubeSceneWithConfig";
 import {startStarryNightScene} from "../scenes/starryNightScene";
+import { landscapeScene } from "../scenes/landscapeScene";
 import {SceneSelector} from "./SceneSelector";
 
 // ============================================
@@ -12,6 +13,12 @@ import {SceneSelector} from "./SceneSelector";
 // ============================================
 
 export const testSceneSelector:SceneSelector = new SceneSelector([
+    {
+        id: 'mountain_scene',
+        name: 'Mountain Scene',
+        description: '',
+        handler: landscapeScene
+    },
     {
         id: 'starry_night_scene',
         name: '🌟 Starry Night Scene',
