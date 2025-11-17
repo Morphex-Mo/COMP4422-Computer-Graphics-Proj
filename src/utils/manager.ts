@@ -148,7 +148,25 @@ export class AzureManager {
 
         light.weatherPropertyList.push(lightIntensity, lightColor);
 
-        this.weather.weatherPropertyGroupList = [scattering, fog, light];
+        const starfield = new WeatherPropertyGroup();
+        starfield.name = "Starfield";
+        starfield.weatherPropertyList = [];
+
+        const starFieldIntensity = new WeatherProperty();
+        starFieldIntensity.name = "StarFieldIntensity";
+        starFieldIntensity.propertyType = WeatherPropertyType.Curve;
+        starFieldIntensity.defaultCurveValue = new AnimationCurve([
+            { time: 0, value: 1 },
+            { time: 6, value: 1 },
+            { time: 6.5, value: 0 },
+            { time: 24-6.5, value: 0 },
+            { time: 24-6, value: 1 },
+            { time: 24, value: 1 },
+        ]);
+
+        starfield.weatherPropertyList.push(starFieldIntensity);
+
+        this.weather.weatherPropertyGroupList = [scattering, fog, light, starfield];
         // 构建一个默认预设用于立即评估（支持 Curve / Gradient 新类型）
         const defaultPreset = WeatherPreset.createFromSchema(this.weather.weatherPropertyGroupList, "Default");
         this.weather.currentWeatherPreset = defaultPreset;
