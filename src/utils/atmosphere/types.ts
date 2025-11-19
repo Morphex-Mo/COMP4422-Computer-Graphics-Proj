@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+export type TextureLike = THREE.Texture | string;
+
 /**
  * 基础大气与雾散射参数（覆盖/驱动用）
  * 与你的原始 skyParams 对应。部分可由天气系统更新。
@@ -32,6 +34,8 @@ export interface AtmosphereParams {
   fogBluishIntensity: number;
   heightFogScatterMultiplier: number;
   mieDistance: number;
+  starFieldTexture?: THREE.Texture;
+  starFieldIntensity: number;
 }
 
 /**
@@ -64,6 +68,8 @@ export type PartialAtmosphereParams = Partial<{
   fogBluishIntensity: number;
   heightFogScatterMultiplier: number;
   mieDistance: number;
+  starFieldTexture: THREE.Texture;
+  starFieldIntensity: number;
 }>;
 
 export interface AtmosphereControllerOptions {
@@ -75,4 +81,5 @@ export interface AtmosphereControllerOptions {
   autoUpdateFromSystems?: boolean;
   // 是否创建 OrbitControls（可选）
   controls?: boolean;
+  starField?: TextureLike;
 }

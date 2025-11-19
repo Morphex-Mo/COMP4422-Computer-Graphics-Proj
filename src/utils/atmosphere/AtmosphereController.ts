@@ -3,7 +3,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { AtmosphereParams, AtmosphereControllerOptions, PartialAtmosphereParams } from "./types";
+import { AtmosphereParams, AtmosphereControllerOptions, PartialAtmosphereParams, TextureLike } from "./types";
 import { computeRayleigh, computeMie, computeMieG } from "./shader-utils";
 import {AzureManager} from "../manager";
  // 可选，如果使用时间与天气系统
@@ -34,6 +34,8 @@ export class AtmosphereController {
     standardFragment?: string;
   };
   private options: AtmosphereControllerOptions;
+  private textureLoader = new THREE.TextureLoader();
+  private starFieldTexture?: THREE.Texture;
 
   // ---- Three 基础 ----
   public scene: THREE.Scene;
@@ -115,6 +117,8 @@ export class AtmosphereController {
       fogBluishIntensity: 0.0,
       heightFogScatterMultiplier: 0.5,
       mieDistance: 1.0,
+      starFieldTexture: undefined,
+      starFieldIntensity: 0.0,
     };
 
     if (cfg.initialParams) {
@@ -173,6 +177,7 @@ export class AtmosphereController {
       this.controls.update();
     }
 
+    this.ensureDefaultStarField();
     this.buildSkybox();
     this.buildFogPass();
     if (this.options.enableDepthDebug && this.shaders.depthVertex && this.shaders.depthFragment) {
@@ -319,6 +324,8 @@ export class AtmosphereController {
         exposure: { value: this.params.exposure },
         rayleighColor: { value: this.params.rayleighColor.clone() },
         mieColor: { value: this.params.mieColor.clone() },
+        starField: { value: this.params.starFieldTexture ?? this.starFieldTexture ?? null },
+        starFieldIntensity: { value: this.params.starFieldIntensity },
       },
       vertexShader: this.shaders.atmoVertex,
       fragmentShader: this.shaders.atmoFragment,
@@ -414,6 +421,12 @@ export class AtmosphereController {
     sU.exposure.value = this.params.exposure;
     sU.rayleighColor.value.copy(this.params.rayleighColor);
     sU.mieColor.value.copy(this.params.mieColor);
+    if (this.starFieldTexture && sU.starField) {
+      sU.starField.value = this.starFieldTexture;
+    }
+    if (sU.starFieldIntensity) {
+      sU.starFieldIntensity.value = this.params.starFieldIntensity;
+    }
 
     // Fog Pass
     const fU = this.fogPass.uniforms;
@@ -516,9 +529,47 @@ export class AtmosphereController {
             const lc = lg[1]?.colorOutput ?? { r: this.directionalLight.color.r, g: this.directionalLight.color.g, b: this.directionalLight.color.b };
             this.directionalLight.color.setRGB(lc.r, lc.g, lc.b);
         }
+        // Starfield (第4组)
+        if (groups.length >= 4) {
+            const sf = groups[3].weatherPropertyList;
+            this.params.starFieldIntensity = sf[0].floatOutput;
+        }
         // 天气属性改变会影响散射与雾，需要刷新
         this.updateAllUniforms();
     }
+
+  private ensureDefaultStarField() {
+    if (this.starFieldTexture || this.params.starFieldTexture) return;
+    // 使用相对路径直接引用资源
+    const defaultUrl = "../../assets/Starfield.png";
+    this.resolveStarField(defaultUrl);
+  }
+
+  private resolveStarField(url: string) {
+    this.textureLoader.load(
+      url,
+      (texture) => {
+        // 成功加载贴图
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        this.starFieldTexture = texture;
+
+        // 更新skybox材质的starField uniform
+        if (this.skyboxMaterial && this.skyboxMaterial.uniforms.starField) {
+          this.skyboxMaterial.uniforms.starField.value = texture;
+        }
+
+        console.log('StarField texture loaded successfully');
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading StarField texture:', error);
+      }
+    );
+  }
 
   private updateSunFromTime() {
     if (!this.azureManager) return;

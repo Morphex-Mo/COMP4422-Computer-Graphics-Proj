@@ -19,6 +19,11 @@ uniform float custom_luminance;  // Sky luminance
 uniform float exposure;          // Exposure value
 uniform vec3 rayleighColor;      // Rayleigh color multiplier
 uniform vec3 mieColor;           // Mie color multiplier
+
+uniform sampler2D starField;   // Starfield texture
+uniform float starFieldIntensity; // Starfield intensity
+
+
 float tpow22(float inpu){
     return exp2( log2(inpu) * (1.0 / 2.2) );
 }
@@ -78,8 +83,14 @@ void main() {
     vec3 moonInScatter = BrmTheta * Esun * scattering * 0.1 * (1.0 - fex);
     moonInScatter *= moonRise;
     moonInScatter *= 1.0 - sunRise;
+
+    vec2 starUV = vec2(atan(viewDir.z, viewDir.x) * (0.5 / PI) + 0.5,
+                       asin(clamp(viewDir.y, -1.0, 1.0)) / PI + 0.5);
+    starUV.y = 1.0 - starUV.y;
+    vec4 starTex = texture(starField, starUV);
+    vec3 stars = starTex.rgb * starTex.a * starTex.a*starFieldIntensity;
     // Output
-    vec3 OutputColor = defaultDayLight + sunInScatter+moonInScatter;
+    vec3 OutputColor = stars*extinction + defaultDayLight + sunInScatter+moonInScatter;
 
     // Tonemapping
     OutputColor = saturate(1.0 - exp(-exposure * OutputColor));
@@ -89,4 +100,3 @@ void main() {
     //gl_FragColor = vec4(tpow22((viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)), 1.0);
     //gl_FragColor = vec4(tpow22((viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)*(viewDir.xyz)), 1.0);
 }
-

@@ -7,6 +7,7 @@ import {startCubeSceneWithConfig} from "../scenes/cubeSceneWithConfig";
 import {startStarryNightScene} from "../scenes/starryNightScene";
 import { landscapeScene } from "../scenes/landscapeScene";
 import {SceneSelector} from "./SceneSelector";
+import {startFoxAtmosphereScene} from "../scenes/foxAtmosphereScene";
 
 // ============================================
 // 创建场景选择器
@@ -18,6 +19,12 @@ export const testSceneSelector:SceneSelector = new SceneSelector([
         name: 'Mountain Scene',
         description: '',
         handler: landscapeScene
+    },
+    {
+        id: 'fox_atmosphere_scene',
+        name: '🦊 Fox + Atmosphere Scene',
+        description: 'Fox模型 + Fogness天空 - 动态星空、雾效、Toon Shader，时间驱动的昼夜变化',
+        handler: startFoxAtmosphereScene
     },
     {
         id: 'starry_night_scene',

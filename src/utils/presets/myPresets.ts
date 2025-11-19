@@ -160,7 +160,26 @@ export const buildingPresets = (manager:AzureManager)=>{
     ]);
 
     light.weatherPropertyList.push(lightIntensity, lightColor);
+
+    const starfield = new WeatherPropertyGroup();
+    starfield.name = "Starfield";
+    starfield.weatherPropertyList = [];
+
+    const starFieldIntensity = new WeatherProperty();
+    starFieldIntensity.name = "StarFieldIntensity";
+    starFieldIntensity.propertyType = WeatherPropertyType.Curve;
+    starFieldIntensity.defaultCurveValue = new AnimationCurve([
+        { time: 0, value: 1 },
+        { time: 6, value: 1 },
+        { time: 6.5, value: 0 },
+        { time: 17.5, value: 0 },
+        { time: 18, value: 1 },
+        { time: 24, value: 1 },
+    ]);
+
+    starfield.weatherPropertyList.push(starFieldIntensity);
+
     // 构建一个默认预设用于立即评估（支持 Curve / Gradient 新类型）
-    const defaultPreset = WeatherPreset.createFromSchema([scattering, fog, light], "Fogness");
+    const defaultPreset = WeatherPreset.createFromSchema([scattering, fog, light, starfield], "Fogness");
     manager.weather.globalWeatherList.push(new GlobalWeatherEntry(defaultPreset,3));
 };
