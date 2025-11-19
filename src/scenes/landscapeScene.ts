@@ -137,9 +137,26 @@ export const landscapeScene = defineScene({
             // 重新计算几何体的法向量，使光照正确
             geometry.computeVertexNormals();
 
+            // 制作颜色
+            const colors = [];
+            const color = new THREE.Color();
+            
+            for (let i = 0; i < vertices.length; i += 3) {
+                const y = vertices[i + 1];
+                
+                // 使用分层的颜色
+                if (y < heightScale * 0.2) {
+                    color.setHex(0x696D52);
+                } else {
+                    color.setHex(0xB28067);
+                }
+                
+                colors.push(color.r, color.g, color.b);
+            }
+            geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+            
             const material = new THREE.MeshPhongMaterial({
-                color: 0x64694d,
-                flatShading: false,
+                vertexColors: true,
             });
             const land = new THREE.Mesh(geometry , material)
             land.position.y = -4;
