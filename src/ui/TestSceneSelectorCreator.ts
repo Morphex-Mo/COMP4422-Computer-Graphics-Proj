@@ -8,6 +8,7 @@ import {startStarryNightScene} from "../scenes/starryNightScene";
 import { landscapeScene } from "../scenes/landscapeScene";
 import {SceneSelector} from "./SceneSelector";
 import {startFoxAtmosphereScene} from "../scenes/foxAtmosphereScene";
+import {starCollectorScene} from "../scenes/starCollectorScene";
 
 // ============================================
 // 创建场景选择器
@@ -15,6 +16,11 @@ import {startFoxAtmosphereScene} from "../scenes/foxAtmosphereScene";
 
 export const testSceneSelector:SceneSelector = new SceneSelector([
     {
+        id: 'starCollectorScene',
+        name: 'Mountain Scene',
+        description: '',
+        handler: starCollectorScene
+    },{
         id: 'mountain_scene',
         name: 'Mountain Scene',
         description: '',

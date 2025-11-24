@@ -124,9 +124,9 @@ export const buildingPresets = (manager:AzureManager)=>{
         makeFloat("GlobalFogDistance", 50),
         makeFloat("GlobalFogSmooth", 0.35),
         makeFloat("GlobalFogDensity", 1.0),
-        makeFloat("HeightFogDistance", 100.0),
+        makeFloat("HeightFogDistance", 1000.0),
         makeFloat("HeightFogSmooth", 0.5),
-        makeFloat("HeightFogDensity", 0.5),
+        makeFloat("HeightFogDensity", 0.2),
         makeFloat("FogBluishDistance", 12288.0),
         makeFloat("FogBluishIntensity", 0.15),
         HeightFogScatterMultiplier, // use Curve here
