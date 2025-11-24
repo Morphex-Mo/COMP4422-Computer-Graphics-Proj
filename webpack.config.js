@@ -8,7 +8,7 @@ const isRelease = process.env.BUILD_MODE === 'release';
 module.exports = {
     entry: isRelease ? './src/index-release.ts' : './src/index.ts',
     mode: isRelease ? 'production' : 'development',
-    target:['web','es5'],
+    target:['web','es2020'],
     devtool: isRelease ? false : 'inline-source-map',
     module: {
         rules: [
@@ -37,6 +37,7 @@ module.exports = {
         chunkFilename: '[name].[contenthash].js',
         path: path.resolve(__dirname, 'dist'),
         clean: true,
+        asyncChunks: true
     },
     plugins: [
         new HtmlWebpackPlugin({
@@ -66,16 +67,24 @@ module.exports = {
         minimizer: [new TerserPlugin({
             terserOptions: {
                 compress: {
-                    drop_console: true
+                    drop_console: true,
+                    // 保留更多代码结构，提高可读性
+                    sequences: false,  // 不合并连续语句
+                    join_vars: false,  // 不合并变量声明
                 },
-                // 3. 配置 format/output 选项，保留空格和删除注释
                 format: {
-                    beautify: true, // 保持代码美观（保留缩进和换行）
-                    comments: false, // 删除所有注释
+                    beautify: true,     // 保持代码美观（保留缩进和换行）
+                    comments: false,    // 删除所有注释
+                    quote_style: 1,     // 使用单引号
+                    preserve_annotations: false,  // 不保留注解
+                    keep_numbers: false, // 不保留原始数字格式
+                    braces: true,       // 总是使用大括号
                 },
-                // 4. 关闭 mangle（变量和函数名混淆），保持代码可读性
-                mangle: false,
-            }
+                mangle: false,  // 关闭变量和函数名混淆，保持代码可读性
+                keep_classnames: true,  // 保留类名
+                keep_fnames: true,      // 保留函数名
+            },
+            extractComments: false,  // 不提取注释到单独文件
         })],
         //runtimeChunk: 'single',
         splitChunks: {
@@ -83,7 +92,7 @@ module.exports = {
             // 默认的配置已经很智能，通常不需要手动添加 cacheGroups
             // 但如果你想更精细地控制，可以添加 cacheGroups
             cacheGroups: {
-                vendor: {
+                threejs: {
                     test: /[\\/]node_modules[\\/]/, // 匹配 node_modules 目录
                     name: 'threejs', // 生成的 chunk 名称
                     chunks: 'all',
@@ -97,6 +106,6 @@ module.exports = {
                 },
             },
         },
+        chunkIds:"named",
     }:{},
-    "sideEffects": false
 };

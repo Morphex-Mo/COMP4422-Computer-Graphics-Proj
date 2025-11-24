@@ -1,4 +1,3 @@
-import {startSharedScene1, startSharedScene2, startSharedScene3} from "../scenes/examples/sharedConfigDemo";
 import {startSimpleTest, startTestWithUI} from "../scenes/examples/testScene";
 import {startLevel1, startLevel2, startLevel3, startLevel4} from "../scenes/examples/sceneLoaderDemo";
 import {startFoxScene} from "../scenes/foxScene";
@@ -92,22 +91,4 @@ export const testSceneSelector:SceneSelector = new SceneSelector([
         description: '使用共享相机和渲染器的场景',
         handler: startLevel4
     },
-    {
-        id: 'shared_scene_1',
-        name: '共享配置场景 1',
-        description: '共享相机/渲染器配置演示 1',
-        handler: startSharedScene1
-    },
-    {
-        id: 'shared_scene_2',
-        name: '共享配置场景 2',
-        description: '共享相机/渲染器配置演示 2',
-        handler: startSharedScene2
-    },
-    {
-        id: 'shared_scene_3',
-        name: '共享配置场景 3',
-        description: '共享相机/渲染器配置演示 3',
-        handler: startSharedScene3
-    }
 ]);
