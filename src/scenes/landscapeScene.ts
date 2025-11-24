@@ -1,6 +1,7 @@
-import { defineScene } from '../core';
+import {defineScene} from '../core';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+
 const NoiseModule = require('noisejs');
 let simpleTestCleanup = null;
 let animationFrameId=null;

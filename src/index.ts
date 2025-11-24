@@ -1,13 +1,6 @@
-import { startSimpleTest, startTestWithUI } from './scenes/examples/testScene';
-import { startLevel1, startLevel2, startLevel3, startLevel4 } from './scenes/examples/sceneLoaderDemo';
-import {
-    initializeGlobalConfig,
-    startSharedScene1,
-    startSharedScene2,
-    startSharedScene3
-} from './scenes/examples/sharedConfigDemo';
-import { globalTimer } from "./core";
-import { SceneSelector, SceneOption } from './ui';
+import {initializeGlobalConfig} from './scenes/examples/sharedConfigDemo';
+import {globalTimer} from "./core";
+import {SceneSelector} from './ui';
 import {testSceneSelector} from "./ui/TestSceneSelectorCreator";
 
 // 初始化全局场景配置（统一的相机和渲染器）

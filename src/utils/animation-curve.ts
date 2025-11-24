@@ -1,4 +1,4 @@
-import { CurveKey } from "./types";
+import {CurveKey} from "./types";
 
 export class AnimationCurve {
   private keys: CurveKey[] = [];

@@ -3,12 +3,8 @@
  */
 
 import * as THREE from 'three';
-import { defineScene } from '../../core/SceneLoader';
-import {
-    GlobalSceneUtils,
-    SceneEnvironmentPresets,
-    applySceneEnvironment
-} from '../../core/SceneConfig';
+import {defineScene} from '../../core/SceneLoader';
+import {applySceneEnvironment, GlobalSceneUtils, SceneEnvironmentPresets} from '../../core/SceneConfig';
 
 /**
  * 初始化全局配置（在应用启动时调用一次）

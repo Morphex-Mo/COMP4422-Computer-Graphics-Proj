@@ -6,8 +6,8 @@
  * - 性能监控
  */
 import * as THREE from 'three';
-import { defineScene } from '../core';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import {defineScene} from '../core';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 
 interface StarConfig {
     count: number;

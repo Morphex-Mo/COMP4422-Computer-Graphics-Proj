@@ -1,7 +1,6 @@
 import * as THREE from "three";
-import { AzureEvents } from "./notification-center";
-import { AzureManager } from "./manager";
-import { WeatherPropertyType } from "./types";
+import {AzureEvents} from "./notification-center";
+import {AzureManager} from "./manager";
 
 /**
  * 把 AzureManager 输出绑定到 Three.js（你的 cubeScene）

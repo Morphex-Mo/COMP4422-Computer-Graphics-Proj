@@ -3,12 +3,8 @@
  */
 
 import * as THREE from 'three';
-import { defineScene, createLevelLoader, createLoadingUI } from '../../core/SceneLoader';
-import {
-    GlobalSceneUtils,
-    SceneEnvironmentPresets,
-    applySceneEnvironment
-} from '../../core/SceneConfig';
+import {createLevelLoader, createLoadingUI, defineScene} from '../../core/SceneLoader';
+import {applySceneEnvironment, GlobalSceneUtils, SceneEnvironmentPresets} from '../../core/SceneConfig';
 
 /**
  * 示例1: 使用 defineScene 定义场景

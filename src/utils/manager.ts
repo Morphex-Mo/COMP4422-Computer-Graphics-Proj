@@ -1,9 +1,8 @@
-import { AzureEvents } from "./notification-center";
-import { TimeSystem } from "./time-system";
-import { WeatherSystem, GlobalWeatherEntry } from "./weather-system";
-import { WeatherPropertyGroup } from "./weather-property-group";
-import { WeatherProperty } from "./weather-property";
-import { WeatherPreset } from "./weather-preset";
+import {TimeSystem} from "./time-system";
+import {GlobalWeatherEntry, WeatherSystem} from "./weather-system";
+import {WeatherPropertyGroup} from "./weather-property-group";
+import {WeatherProperty} from "./weather-property";
+import {WeatherPreset} from "./weather-preset";
 import {CurveKey, WeatherPropertyType} from "./types";
 import {AnimationCurve} from "./animation-curve";
 import {Gradient} from "./gradient";

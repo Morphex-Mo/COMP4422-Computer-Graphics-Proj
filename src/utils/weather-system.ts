@@ -1,8 +1,7 @@
-import { AzureEvents } from "./notification-center";
-import { WeatherPropertyGroup } from "./weather-property-group";
-import { WeatherProperty } from "./weather-property";
-import { WeatherPreset } from "./weather-preset";
-import { WeatherPropertyType } from "./types";
+import {AzureEvents} from "./notification-center";
+import {WeatherPropertyGroup} from "./weather-property-group";
+import {WeatherPreset} from "./weather-preset";
+import {WeatherPropertyType} from "./types";
 
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 function lerpColor(a: any, b: any, t: number) {

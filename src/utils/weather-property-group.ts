@@ -1,4 +1,4 @@
-import { WeatherProperty } from "./weather-property";
+import {WeatherProperty} from "./weather-property";
 
 export class WeatherPropertyGroup {
   name = "GroupName";

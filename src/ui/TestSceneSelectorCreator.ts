@@ -5,7 +5,7 @@ import {startFoxScene} from "../scenes/foxScene";
 import {startCubeScene} from "../scenes/cubeScene";
 import {startCubeSceneWithConfig} from "../scenes/cubeSceneWithConfig";
 import {startStarryNightScene} from "../scenes/starryNightScene";
-import { landscapeScene } from "../scenes/landscapeScene";
+import {landscapeScene} from "../scenes/landscapeScene";
 import {SceneSelector} from "./SceneSelector";
 import {startFoxAtmosphereScene} from "../scenes/foxAtmosphereScene";
 import {starCollectorScene} from "../scenes/starCollectorScene";

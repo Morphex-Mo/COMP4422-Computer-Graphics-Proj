@@ -1,4 +1,4 @@
-import { TaskObject } from './TaskPool';
+import {TaskObject} from './TaskPool';
 
 /**
  * 最小堆实现 - 用于优化任务队列

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { AtmosphereParams } from "./types";
+import {AtmosphereParams} from "./types";
 
 /**
  * 与你原有的 computeRayleigh/Mie/MieG 一致，抽离便于复用。

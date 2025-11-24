@@ -1,5 +1,3 @@
-import type { ColorRGBA, Vec3 } from "./types";
-
 /**
  * 极简事件中心，仿 AzureNotificationCenter。
  */

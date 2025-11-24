@@ -6,6 +6,7 @@ import {Gradient} from "../gradient";
 import {WeatherPreset} from "../weather-preset";
 import {AzureManager} from "../manager";
 import {GlobalWeatherEntry} from "../weather-system";
+
 type RGBA = { r: number; g: number; b: number; a: number };
 
 /**

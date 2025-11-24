@@ -1,4 +1,4 @@
-import type { GradientKey, ColorRGBA } from "./types";
+import type {ColorRGBA, GradientKey} from "./types";
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;

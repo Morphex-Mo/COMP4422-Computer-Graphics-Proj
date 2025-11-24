@@ -2,11 +2,11 @@
  * Cube Scene - 简单场景展示天空盒、雾效和Standard Shader立方体
  */
 import * as THREE from 'three';
-import { defineScene } from '../core';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import {defineScene} from '../core';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js';
+import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass.js';
 
 let cleanupFunction: (() => void) | null = null;
 let animationFrameId: number | null = null;

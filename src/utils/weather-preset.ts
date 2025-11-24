@@ -1,7 +1,6 @@
-import { WeatherPropertyGroup } from "./weather-property-group";
-import { AnimationCurve } from "./animation-curve";
-import { WeatherProperty } from "./weather-property";
-import { Gradient } from "./gradient"; // added
+import {WeatherPropertyGroup} from "./weather-property-group";
+import {AnimationCurve} from "./animation-curve";
+import {Gradient} from "./gradient"; // added
 
 /**
  * 每个组有一条 rampCurve，控制该组在整体过渡中的权重。

@@ -3,8 +3,8 @@
  * 优化版：减少陶瓷感，增强柔和度
  */
 import * as THREE from 'three';
-import { defineScene } from '../core';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import {defineScene} from '../core';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 
 /**
  * 创建动漫风格材质（优化参数）

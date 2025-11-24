@@ -15,13 +15,13 @@
  * - 预留音效钩子 (TODO 注释)
  */
 import * as THREE from 'three';
-import { defineScene } from '../core';
+import {defineScene} from '../core';
 // 新增：引入可调大气与天气系统
-import { AtmosphereController } from '../utils/atmosphere/AtmosphereController';
-import { AzureManager } from '../utils/manager';
-import { buildingPresets } from '../utils/presets/myPresets';
+import {AtmosphereController} from '../utils/atmosphere/AtmosphereController';
+import {AzureManager} from '../utils/manager';
+import {buildingPresets} from '../utils/presets/myPresets';
 // 新增导入 OrbitControls 以便调试摄像机
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 
 // 资源清理引用
 let cleanup: (() => void) | null = null;

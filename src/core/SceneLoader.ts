@@ -2,8 +2,8 @@
  * 场景加载器包装函数 - 提供便捷的场景定义和加载接口
  */
 
-import { ResourceConfig, ResourceType } from './ResourceLoader';
-import { globalSceneManager, SceneConfig } from './SceneManager';
+import {ResourceConfig, ResourceType} from './ResourceLoader';
+import {globalSceneManager, SceneConfig} from './SceneManager';
 
 /**
  * 简化的场景定义接口

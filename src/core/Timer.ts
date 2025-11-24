@@ -1,5 +1,5 @@
-import { TaskPool, TaskObject } from './TaskPool';
-import { MinHeap } from './MinHeap';
+import {TaskObject, TaskPool} from './TaskPool';
+import {MinHeap} from './MinHeap';
 
 /**
  * 定时器配置选项

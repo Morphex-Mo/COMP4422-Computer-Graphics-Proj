@@ -1,6 +1,6 @@
-import { AnimationCurve } from "./animation-curve";
-import { AzureEvents } from "./notification-center";
-import { TimeDirection, TimeLoop, TimeMode } from "./types";
+import {AnimationCurve} from "./animation-curve";
+import {AzureEvents} from "./notification-center";
+import {TimeDirection, TimeLoop, TimeMode} from "./types";
 
 /**
  * Simple 版：只用 timeline(0..24) 驱动时间；支持 DayLength、dawn/dusk 影响 timeLengthCurve。

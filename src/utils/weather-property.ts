@@ -1,6 +1,6 @@
-import { WeatherPropertyType, ColorRGBA, Vec3 } from "./types";
-import { AnimationCurve } from "./animation-curve";
-import { Gradient } from "./gradient";
+import {ColorRGBA, Vec3, WeatherPropertyType} from "./types";
+import {AnimationCurve} from "./animation-curve";
+import {Gradient} from "./gradient";
 
 export class WeatherProperty {
   name = "MyPropertyName";

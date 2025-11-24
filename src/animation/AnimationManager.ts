@@ -1,4 +1,4 @@
-import { Animation, AnimationOptions, Easing } from './Animation';
+import {Animation, AnimationOptions, Easing} from './Animation';
 
 /**
  * 动画管理器 - 管理多个动画

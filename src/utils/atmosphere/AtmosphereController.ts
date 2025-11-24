@@ -1,12 +1,13 @@
 import * as THREE from "three";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { AtmosphereParams, AtmosphereControllerOptions, PartialAtmosphereParams, TextureLike } from "./types";
-import { computeRayleigh, computeMie, computeMieG } from "./shader-utils";
+import {EffectComposer} from "three/examples/jsm/postprocessing/EffectComposer.js";
+import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass.js";
+import {ShaderPass} from "three/examples/jsm/postprocessing/ShaderPass.js";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
+import {AtmosphereControllerOptions, AtmosphereParams, PartialAtmosphereParams} from "./types";
+import {computeMie, computeMieG, computeRayleigh} from "./shader-utils";
 import {AzureManager} from "../manager";
- // 可选，如果使用时间与天气系统
+
+// 可选，如果使用时间与天气系统
 
 /**
  * 完全接管：天空盒 + 雾散射后处理 + 深度RT + 光照 + 参数同步
@@ -541,7 +542,7 @@ export class AtmosphereController {
   private ensureDefaultStarField() {
     if (this.starFieldTexture || this.params.starFieldTexture) return;
     // 使用相对路径直接引用资源
-    const defaultUrl = "../../assets/Starfield.png";
+    const defaultUrl = "assets/Starfield.png";
     this.resolveStarField(defaultUrl);
   }
 

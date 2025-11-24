@@ -2,7 +2,7 @@
  * 场景管理器 - 管理场景加载和切换
  */
 
-import { ResourceLoader, ResourceConfig } from './ResourceLoader';
+import {ResourceConfig, ResourceLoader} from './ResourceLoader';
 
 /**
  * 场景配置接口
