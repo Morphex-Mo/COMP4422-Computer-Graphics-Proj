@@ -400,24 +400,78 @@ export const starCollectorScene = defineScene({
         let star1: FallingStar | null = null;
         let star2: FallingStar | null = null;
         let star3: FallingStar | null = null;
-
-        // 文字覆盖层
-        const overlay = document.createElement('div');
-        overlay.style.position = 'absolute';
-        overlay.style.top = '40%';
-        overlay.style.left = '50%';
-        overlay.style.transform = 'translate(-50%, -50%)';
-        overlay.style.padding = '12px 24px';
-        overlay.style.background = 'rgba(0,0,0,0.3)';
-        overlay.style.borderRadius = '8px';
-        overlay.style.color = '#ffffff';
-        overlay.style.fontFamily = '"Microsoft YaHei", sans-serif';
-        overlay.style.fontSize = '32px';
-        overlay.style.letterSpacing = '2px';
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 1.5s ease';
-        overlay.textContent = '狐狸星星宝藏';
-        if (app) app.appendChild(overlay);
+        
+        // 新增：狐狸最终释放星星特效相关结构与常量
+        interface ReleaseStar {
+            mesh: THREE.Mesh;
+            startTime: number;
+            velocity: THREE.Vector3;
+            angularSpeed: number;
+            phase: number;
+            life: number;
+            active: boolean;
+        }
+        const releaseStars: ReleaseStar[] = [];
+        // 替换一次性喷射配置为循环发射配置
+        const EMIT_START = 33; // 开始持续发射时间
+        const EMIT_RATE = 6;   // 每秒发射颗粒数
+        const MAX_STARS = 50;  // 池最大星星数
+        const STAR_LIFE_MIN = 3.0;
+        const STAR_LIFE_MAX = 5.0;
+        const UP_INIT_SPEED_MIN = 1.8;
+        const UP_INIT_SPEED_MAX = 3.2;
+        const UP_ACCEL = 0.6;  // 反重力向上加速度
+        let emissionAccumulator = 0; // 发射累计器(用于按速率生成)
+        let emitterActive = false;   // 是否已启动发射
+        const releaseStarGeo = new THREE.SphereGeometry(0.16, 14, 14);
+        const baseReleaseMat = new THREE.MeshStandardMaterial({
+            color: 0xffeebb,
+            emissive: new THREE.Color(0xffeebb),
+            emissiveIntensity: 2.0,
+            roughness: 0.35,
+            metalness: 0.0,
+            transparent: true,
+            opacity: 0.0 // 初始0用于淡入
+        });
+        // 扩展 ReleaseStar 结构
+        // 预创建池
+        for (let i = 0; i < MAX_STARS; i++) {
+            const mat = baseReleaseMat.clone();
+            const mesh = new THREE.Mesh(releaseStarGeo, mat);
+            mesh.visible = false;
+            mesh.castShadow = false;
+            const star: ReleaseStar = {
+                mesh,
+                startTime: 0,
+                velocity: new THREE.Vector3(),
+                angularSpeed: 0,
+                phase: 0,
+                life: 0,
+                active: false
+            };
+            releaseStars.push(star);
+            scene.add(mesh);
+        }
+        function spawnReleaseStar(origin: THREE.Vector3, now: number) {
+            // 找到非激活星
+            const star = releaseStars.find(s => !s.active);
+            if (!star) return; // 池满
+            star.active = true;
+            star.startTime = now;
+            star.life = THREE.MathUtils.lerp(STAR_LIFE_MIN, STAR_LIFE_MAX, Math.random());
+            const upSpeed = THREE.MathUtils.lerp(UP_INIT_SPEED_MIN, UP_INIT_SPEED_MAX, Math.random());
+            const horizSpeed = 0.4 + Math.random() * 0.8;
+            const angle = Math.random() * Math.PI * 2;
+            star.velocity.set(Math.cos(angle) * horizSpeed, upSpeed, Math.sin(angle) * horizSpeed);
+            star.angularSpeed = (Math.random() - 0.5) * 2.5;
+            star.phase = Math.random() * Math.PI * 2;
+            star.mesh.position.copy(origin);
+            star.mesh.scale.setScalar(0.2); // 初始缩放用于淡入
+            star.mesh.visible = true;
+            const mat = star.mesh.material as THREE.MeshStandardMaterial;
+            mat.opacity = 0.0;
+            mat.emissiveIntensity = 2.2;
+        }
 
         // 简单缓动函数
         function easeInOutQuad(t: number) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
@@ -558,8 +612,14 @@ export const starCollectorScene = defineScene({
                     star3.targetPos.copy(star3.startPos);
                     star3.caught = true; // 直接悬浮
                     star3.hoverOffset = new THREE.Vector3();
-                    console.log('[StarCollector] ✨ 第三颗星出现');
-                    // TODO 播放第三颗星出现音效
+                    console.log('[StarCollector] ✨ 第三颗星出现 (触发释放准备)');
+                }
+
+                // 启动连续星星发射（取代一次性喷射）
+                if (elapsed >= EMIT_START && !emitterActive) {
+                    emitterActive = true;
+                    // overlay removed — no text fade needed
+                    console.log('[StarCollector] 🌌 连续星星发射启动');
                 }
 
                 // 更新星星下落 & 状态
@@ -570,6 +630,14 @@ export const starCollectorScene = defineScene({
                         const clamped = Math.min(Math.max(t, 0), 1);
                         const eased = easeOutQuad(clamped);
                         const current = new THREE.Vector3().lerpVectors(star.startPos, star.targetPos, eased);
+                        // 波浪漂移（横向 + 轻微纵向摆动）
+                        const waveFreq = 2.5; // 频率
+                        const waveAmpXY = 0.8 * (1 - eased * 0.6); // 振幅后期减小
+                        const waveAmpY = 0.3 * (1 - eased); // 纵向微波动减弱
+                        const timeAlong = (elapsed - star.fallStart);
+                        current.x += Math.sin(timeAlong * waveFreq) * waveAmpXY;
+                        current.z += Math.cos(timeAlong * waveFreq * 0.9) * waveAmpXY * 0.7;
+                        current.y += Math.sin(timeAlong * waveFreq * 0.6 + Math.PI / 3) * waveAmpY;
                         star.mesh.position.copy(current);
                         // 下落过程旋转
                         star.mesh.rotation.y += 0.05;
@@ -577,23 +645,18 @@ export const starCollectorScene = defineScene({
                         if (clamped >= 1 && !star.caught) {
                             star.caught = true;
                             star.pulseStart = elapsed;
-                            // 捕获闪光：瞬时放大并开始消失动画
                             star.mesh.scale.set(2.0, 2.0, 2.0);
                             console.log('[StarCollector] ⭐ 星星捕获');
-                            // TODO 播放捕获音效 (bling)
                         }
                     } else {
-                        // 捕获后：闪光缩小消失（0.6秒内）
                         const collectTime = elapsed - (star.pulseStart || elapsed);
                         if (collectTime < 0.6) {
-                            // 闪光阶段 0-0.2s：放大并增强发光
                             if (collectTime < 0.2) {
                                 const flashProgress = collectTime / 0.2;
                                 star.mesh.scale.setScalar(2.0 + flashProgress * 0.5);
                                 (star.mesh.material as THREE.MeshStandardMaterial).emissiveIntensity = 3.0 + flashProgress * 2.0;
                                 (star.glow.material as THREE.MeshBasicMaterial).opacity = 0.6;
                             } else {
-                                // 缩小消失阶段 0.2-0.6s
                                 const fadeProgress = (collectTime - 0.2) / 0.4;
                                 const scale = 2.5 * (1 - fadeProgress);
                                 star.mesh.scale.setScalar(Math.max(scale, 0.01));
@@ -601,13 +664,54 @@ export const starCollectorScene = defineScene({
                                 (star.glow.material as THREE.MeshBasicMaterial).opacity = 0.6 * (1 - fadeProgress);
                             }
                         } else {
-                            // 完全消失后移除
                             star.mesh.visible = false;
                         }
                     }
                 });
 
-                // 移除原胸口移动逻辑（星星直接消失）
+                // 更新释放星星的抛物线 + 波浪轨迹 (改为循环上升反重力)
+                if (emitterActive) {
+                    const origin = foxRoot ? foxRoot.position.clone().add(new THREE.Vector3(0, 2.0, 0)) : new THREE.Vector3();
+                    // 发射逻辑（按速率）
+                    emissionAccumulator += timelineDelta * EMIT_RATE;
+                    while (emissionAccumulator >= 1) {
+                        spawnReleaseStar(origin, elapsed);
+                        emissionAccumulator -= 1;
+                    }
+                    const upAccel = UP_ACCEL; // 反重力加速度(向上)
+                    for (const s of releaseStars) {
+                        if (!s.active) continue;
+                        const tLife = elapsed - s.startTime;
+                        if (tLife > s.life) {
+                            // 回收
+                            s.active = false;
+                            s.mesh.visible = false;
+                            continue;
+                        }
+                        // 运动方程：y = v0*t + 0.5*a*t^2
+                        const y = s.velocity.y * tLife + 0.5 * upAccel * tLife * tLife; // 上升加速
+                        const wave1 = Math.sin(tLife * 2.6 + s.phase) * 0.4;
+                        const wave2 = Math.cos(tLife * 2.2 + s.phase * 1.3) * 0.35;
+                        s.mesh.position.set(
+                            origin.x + s.velocity.x * tLife + wave1,
+                            origin.y + y + Math.sin(tLife * 3.0 + s.phase) * 0.25,
+                            origin.z + s.velocity.z * tLife + wave2
+                        );
+                        // 旋转与缩放渐变
+                        s.mesh.rotation.y += s.angularSpeed * 0.02;
+                        const mat = s.mesh.material as THREE.MeshStandardMaterial;
+                        const fadeIn = Math.min(tLife / 0.4, 1); // 0.4s 淡入
+                        const fadeOut = tLife > s.life - 0.6 ? 1 - (tLife - (s.life - 0.6)) / 0.6 : 1; // 最后0.6s淡出
+                        mat.opacity = Math.max(0, fadeIn * fadeOut);
+                        // 发光脉动 + 衰减
+                        const lifeRatio = tLife / s.life;
+                        const emissivePulse = 2.0 + Math.sin(tLife * 5 + s.phase) * 0.6 * (1 - lifeRatio);
+                        mat.emissiveIntensity = emissivePulse;
+                        // 缩放由 0.2 -> 0.35 (前半段)，后半段保持
+                        const scale = lifeRatio < 0.5 ? 0.2 + (lifeRatio / 0.5) * 0.15 : 0.35;
+                        s.mesh.scale.setScalar(scale);
+                    }
+                }
 
                 // 尾巴卷动（32s后，即第二颗星收集完成后，原27s + 5s）
                 if (tailBone && elapsed >= 32) {
@@ -645,10 +749,7 @@ export const starCollectorScene = defineScene({
                     camera.lookAt(PULL_TARGET_LOOK_AT);
                 }
 
-                // 文本显示 (33s 后渐显，原28s + 5s)
-                if (elapsed >= 33) {
-                    overlay.style.opacity = '1';
-                }
+                // 文本显示逻辑被释放星星替换（不再显示）
             } else {
                 // 调试模式：允许自由控制摄像机，不执行脚本镜头变换
                 if (debugControls) debugControls.update();
@@ -664,7 +765,6 @@ export const starCollectorScene = defineScene({
             window.removeEventListener('keydown', handleKey);
             disableDebugCamera();
             controller.dispose();
-            if (overlay && overlay.parentElement) overlay.parentElement.removeChild(overlay);
             if (debugHintDiv && debugHintDiv.parentElement) debugHintDiv.parentElement.removeChild(debugHintDiv);
             console.log('[StarCollector] 资源清理完成');
         };
