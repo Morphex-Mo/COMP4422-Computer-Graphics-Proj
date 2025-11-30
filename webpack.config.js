@@ -49,7 +49,8 @@ module.exports = {
                 {
                     from: 'src/assets',
                     to: 'assets',
-                }
+                },
+                { from: 'public', to: '.' } // 复制 public 文件夹中的所有文件
             ]
         }),
         /*new BundleAnalyzerPlugin({

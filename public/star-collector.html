@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Collector Scene - COMP4422</title>
+    <meta http-equiv="refresh" content="0; url=./index.html?scene=starCollectorScene">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        .loading-container {
+            text-align: center;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #00ff88;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #00ff88;
+        }
+        p {
+            margin: 10px 0 0;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <h2>🌟 Loading Star Collector Scene...</h2>
+        <p>Redirecting to animation...</p>
+    </div>
+    <script>
+        // 如果自动跳转失败，手动跳转
+        setTimeout(() => {
+            window.location.href = './index.html?scene=starCollectorScene';
+        }, 1000);
+    </script>
+</body>
+</html>

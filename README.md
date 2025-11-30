@@ -2,6 +2,15 @@
 
 使用 TypeScript + Three.js + Webpack 的计算机图形学项目
 
+## 🌟 Star Collector Scene - Direct Access
+
+### Public Links (After Deployment)
+
+**Main Application:**
+```
+https://example.com
+```
+
 ## 安装依赖
 
 ```bash
