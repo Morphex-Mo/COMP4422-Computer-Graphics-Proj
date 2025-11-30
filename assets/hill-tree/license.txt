@@ -1,0 +1,11 @@
+Model Information:
+* title:	Hill-tree
+* source:	https://sketchfab.com/3d-models/hill-tree-41c4f1b3979940dab34d08b1bce197f9
+* author:	Pixel (https://sketchfab.com/stefan.lengyel1)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Hill-tree" (https://sketchfab.com/3d-models/hill-tree-41c4f1b3979940dab34d08b1bce197f9) by Pixel (https://sketchfab.com/stefan.lengyel1) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

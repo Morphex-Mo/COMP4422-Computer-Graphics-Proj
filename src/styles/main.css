@@ -1,0 +1,12 @@
+/* 全局样式 - 大部分样式已内联在组件中 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}

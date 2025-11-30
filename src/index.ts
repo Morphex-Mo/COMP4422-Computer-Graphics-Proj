@@ -1,7 +1,6 @@
 import {globalTimer} from "./core";
 import {SceneSelector} from './ui';
 import {testSceneSelector} from "./ui/TestSceneSelectorCreator";
-import './styles/main.css';
 
 console.log('[App] Global scene configuration initialized');
 
