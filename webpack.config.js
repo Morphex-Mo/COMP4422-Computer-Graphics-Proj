@@ -36,7 +36,8 @@ module.exports = {
         chunkFilename: '[name].[contenthash].js',
         path: path.resolve(__dirname, 'dist'),
         clean: true,
-        asyncChunks: true
+        asyncChunks: true,
+        publicPath: './' // 使用相对路径
     },
     plugins: [
         new HtmlWebpackPlugin({
@@ -67,9 +68,12 @@ module.exports = {
         })*/
     ],
     devServer: {
-        static: './dist',
+        static: {
+            directory: path.join(__dirname, 'dist')
+        },
         port: 8080,
-        hot: true,
+        open: true,
+        hot: true
     },
     optimization: isRelease?{
         minimize: true,
