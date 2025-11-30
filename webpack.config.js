@@ -53,6 +53,15 @@ module.exports = {
                 { from: 'public', to: '.' } // 复制 public 文件夹中的所有文件
             ]
         }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: 'public',
+                    to: '.',
+                    noErrorOnMissing: true
+                }
+            ]
+        }),
         /*new BundleAnalyzerPlugin({
             analyzerMode: 'server', // 构建后会打开一个展示 bundle 的服务器窗口
             openAnalyzer: true,
