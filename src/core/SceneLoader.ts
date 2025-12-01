@@ -1,54 +1,28 @@
-/**
- * 场景加载器包装函数 - 提供便捷的场景定义和加载接口
- */
-
+// Scene loader wrapper functions
 import {ResourceConfig, ResourceType} from './ResourceLoader';
 import {globalSceneManager, SceneConfig} from './SceneManager';
 
-/**
- * 简化的场景定义接口
- */
 export interface SimpleSceneDefinition {
-    /** 场景唯一标识 */
     id: string;
-    /** 场景名称 */
     name: string;
-    /** 需要加载的资源（简化配置） */
     resources?: {
-        /** 图片资源 */
         images?: { [key: string]: string };
-        /** 音频资源 */
         audios?: { [key: string]: string };
-        /** 视频资源 */
         videos?: { [key: string]: string };
-        /** 纹理资源 */
         textures?: { [key: string]: string };
-        /** 立方体纹理（天空盒） */
         cubeTextures?: { [key: string]: string[] };
-        /** GLTF模型 */
         gltfModels?: { [key: string]: string };
-        /** FBX模型 */
         fbxModels?: { [key: string]: string };
-        /** OBJ模型 */
         objModels?: { [key: string]: string };
-        /** Shader文件 */
         shaders?: { [key: string]: string };
-        /** JSON文件 */
         jsons?: { [key: string]: string };
-        /** 字体文件 */
         fonts?: { [key: string]: string };
     };
-    /** 加载进度回调 */
     onLoadProgress?: (loaded: number, total: number, percentage: number) => void;
-    /** 场景主函数（资源加载完成后执行） */
     main: (resources: Map<string, any>) => void | Promise<void>;
-    /** 场景退出函数 */
     onExit?: () => void | Promise<void>;
 }
 
-/**
- * 将简化的资源配置转换为完整的资源配置数组
- */
 function convertResources(resources?: SimpleSceneDefinition['resources']): ResourceConfig[] {
     if (!resources) return [];
 

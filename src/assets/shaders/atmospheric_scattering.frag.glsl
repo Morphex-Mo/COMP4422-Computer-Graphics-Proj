@@ -28,9 +28,7 @@ float tpow22(float inpu){
     return exp2( log2(inpu) * (1.0 / 2.2) );
 }
 void main() {
-    // Directions
     vec3 viewDir = normalize(vWorldPosition - cameraPosition);
-    //viewDir.z=-viewDir.z;
     vec3 sunDirection = normalize(sunPosition);
     vec3 moonDirection = normalize(-sunPosition);
     float sunCosTheta = dot(viewDir, sunDirection);
@@ -42,18 +40,15 @@ void main() {
 
     float sunset = dot(vec3(0.0, 1.0, 0.0), sunDirection);
 
-    // Optical depth
     float zenith = acos(saturate(dot(vec3(0.0, 1.0, 0.0), viewDir)));
     float z = cos(zenith) + 0.15 * pow(93.885 - ((zenith * 180.0) / PI), -1.253);
     float SR = kr / z;
     float SM = km / z;
 
-    // Extinction
     vec3 fex = exp(-(rayleighCoef * SR + mieCoef * SM));
     float horizonMask = saturate(viewDir.y * 10.0);
     vec3 extinction = saturate(fex) * horizonMask;
 
-    // Default sky - When there is no sun in the sky!
     vec3 Esun = 1.0 - fex;
     float rayPhase = 2.0 + 0.5 * pow(skyCosTheta, 2.0);
     vec3 BrTheta = Pi316 * rayleighCoef * rayPhase * rayleighColor;
@@ -62,8 +57,6 @@ void main() {
     defaultDayLight *= 1.0 - sunRise;
     defaultDayLight *= 1.0 - moonRise;
 
-
-    // Sun inScattering
     Esun = mix(fex, (1.0 - fex), sunset);
     rayPhase = 2.0 + 0.5 * pow(sunCosTheta, 2.0);
     float miePhase = mieG.x / pow(mieG.y - mieG.z * sunCosTheta, 1.5);
@@ -73,7 +66,6 @@ void main() {
     vec3 sunInScatter = BrmTheta * Esun * scattering * (1.0 - fex);
     sunInScatter *= sunRise;
 
-    // Moon inScattering
     Esun = (1.0 - fex);
     rayPhase = 2.0 + 0.5 * pow(moonCosTheta, 2.0);
     miePhase = mieG.x / pow(mieG.y - mieG.z * moonCosTheta, 1.5);
@@ -89,7 +81,6 @@ void main() {
     starUV.y = 1.0 - starUV.y;
     vec4 starTex = texture(starField, starUV);
     vec3 stars = starTex.rgb * starTex.a * starTex.a*starFieldIntensity;
-    // Output
     vec3 OutputColor = stars*extinction + defaultDayLight + sunInScatter+moonInScatter;
 
     // Tonemapping

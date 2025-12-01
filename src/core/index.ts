@@ -1,7 +1,3 @@
-/**
- * 核心模块导出
- */
-
 export { TaskPool, TaskObject } from './TaskPool';
 export { MinHeap } from './MinHeap';
 export { Timer, TimerOptions, globalTimer } from './Timer';

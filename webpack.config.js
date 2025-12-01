@@ -3,13 +3,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const isRelease = process.env.BUILD_MODE === 'release';
 
 module.exports = {
-    entry: isRelease ? './src/index-release.ts' : './src/index.ts',
-    mode: isRelease ? 'production' : 'development',
+    entry: './src/index-release.ts',
+    mode: 'production',
     target:['web','es2020'],
-    devtool: isRelease ? false : 'inline-source-map',
+    devtool:  false,
     module: {
         rules: [
             {
@@ -42,7 +41,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             template: './src/index.html',
-            title: isRelease ? 'Star Collector' : 'COMP4422 Computer Graphics Project',
+            title: 'Star Collector',
         }),
         new CopyWebpackPlugin({
             patterns: [
@@ -62,7 +61,7 @@ module.exports = {
         port: 8080,
         hot: true,
     },
-    optimization: isRelease?{
+    optimization: {
         minimize: true,
         minimizer: [new TerserPlugin({
             terserOptions: {
@@ -107,5 +106,5 @@ module.exports = {
             },
         },
         chunkIds:"named",
-    }:{},
+    }
 };

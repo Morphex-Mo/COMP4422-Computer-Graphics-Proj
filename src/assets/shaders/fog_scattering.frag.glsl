@@ -150,15 +150,11 @@ void main() {
     defaultDayLight *= (1.0 - sunRise);
     defaultDayLight *= (1.0 - moonRise);
 
-    // 太阳内散射
     fex = mix(fex1, fex2, sunDot - 0.1);
     fex = mix(fex, fex3, depth);
-    Esun = mix(fex, (1.0 - fex), sunDot); // Unity: Esun = lerp(fex, 1-fex, sunDot)
-    rayPhase = 2.0 + 0.5 * pow(sunCosTheta, 2.0); // Unity: 2 + 0.5 * pow(sunCosTheta,2)
-    // Unity 原版 Henyey-Greenstein 近似：miePhase = _Azure_MieG.x / pow(_Azure_MieG.y - _Azure_MieG.z * sunCosTheta, 1.5)
-    // 去掉原实现中的 abs 以保证前/后向散射不被对称化
-    // 补偿需求：当前效果少旋转 180°，对 Mie 散射取反 cosθ 即可（cos(θ+π) = -cosθ）。
-    float mieSunCos = sunCosTheta; // 180° 方向补偿（现在不要）
+    Esun = mix(fex, (1.0 - fex), sunDot);
+    rayPhase = 2.0 + 0.5 * pow(sunCosTheta, 2.0);
+    float mieSunCos = sunCosTheta;
     float miePhase = mieG.x / pow(mieG.y - mieG.z * mieSunCos, 1.5);
     BrTheta = Pi316 * rayleighCoef * rayPhase * rayleighColor;
     vec3 BmTheta = Pi14 * mieCoef * miePhase * mieColor * mieDepth;
@@ -166,12 +162,11 @@ void main() {
     vec3 sunInScatter = BrmTheta * Esun * scattering * (1.0 - fex);
     sunInScatter *= sunRise;
 
-    // 月亮内散射（保持原版 Azure 算法 + 同样的 180° 补偿）
     fex = mix(fex1, fex2, moonDot - 0.1);
     fex = mix(fex, fex3, depth);
     Esun = 1.0 - fex;
     rayPhase = 2.0 + 0.5 * pow(moonCosTheta, 2.0);
-    float mieMoonCos = moonCosTheta; // 180° 方向补偿
+    float mieMoonCos = moonCosTheta;
     miePhase = mieG.x / pow(mieG.y - mieG.z * mieMoonCos, 1.5);
     BrTheta = Pi316 * rayleighCoef * rayPhase * rayleighColor;
     BmTheta = Pi14 * mieCoef * miePhase * mieColor * mieDepth;
@@ -180,16 +175,11 @@ void main() {
     moonInScatter *= moonRise;
     moonInScatter *= (1.0 - sunRise);
 
-    // 最终雾效颜色 (Unity: defaultDayLight + sunInScatter + moonInScatter)
     vec3 fogColor = defaultDayLight + sunInScatter + moonInScatter;
     fogColor += heightFog * heightFogScatterMultiplier;
 
-    // 色调映射 (Unity: saturate(1 - exp(-Exposure * fogColor)))
     fogColor = clamp(1.0 - exp(-exposure * fogColor), 0.0, 1.0);
 
-    // 与原版Unity更一致的输出方式：RGB为雾散射颜色，Alpha为 totalFog。若希望继续当前直接混合可以保留原finalColor逻辑。
-    // 当前项目之前做了 mix(color.rgb, fogColor, totalFog) 得到最终屏幕颜色。若切换到与Unity相同管线，可让后续Pass用 alpha 混合。
-
     vec3 finalColor = mix(color.rgb, fogColor, totalFog);
-    gl_FragColor = vec4(finalColor, 1.0); // 改为 totalFog 作为 alpha 方便后续若要做自定义合成
+    gl_FragColor = vec4(finalColor, 1.0);
 }

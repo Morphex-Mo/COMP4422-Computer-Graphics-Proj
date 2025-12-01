@@ -192,9 +192,6 @@ export class Timer {
         }.bind(self));
     }
 
-    /**
-     * 停止定时器
-     */
     stop(): void {
         if (this.timerId !== null) {
             clearInterval(this.timerId as any);
@@ -202,46 +199,28 @@ export class Timer {
         }
     }
 
-    /**
-     * 清空所有任务
-     */
     clear(): void {
         this.taskQueue.clear();
         this.taskSet.clear();
         this.taskTotal = 0;
     }
 
-    /**
-     * 异步延迟
-     */
     sleep(delayTime: number): Promise<void> {
         return new Promise(resolve => this.addTask(delayTime, resolve));
     }
 
-    /**
-     * 设置速度
-     */
     setSpeed(speed: number): void {
         this.speed = speed;
     }
 
-    /**
-     * 获取当前时间
-     */
     getTime(): number {
         return this.now;
     }
 
-    /**
-     * 计算经过的时间（最大100ms，防止突变）
-     */
     private calcTimePassed(delta: number): number {
         return Math.min(delta, 100);
     }
 
-    /**
-     * 获取任务队列信息（用于调试）
-     */
     getDebugInfo(): { queueSize: number; setSize: number; totalTasks: number; currentTime: number } {
         return {
             queueSize: this.taskQueue.size,
@@ -252,8 +231,5 @@ export class Timer {
     }
 }
 
-/**
- * 全局定时器实例
- */
 export const globalTimer = new Timer({ forceTimeSync: true, speed: 1 });
 

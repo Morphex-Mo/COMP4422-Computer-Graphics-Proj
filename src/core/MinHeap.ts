@@ -99,17 +99,12 @@ export class MinHeap<T extends TaskObject> {
      * 返回负数表示 a < b，0 表示相等，正数表示 a > b
      */
     private compare(a: T, b: T): number {
-        // 先按执行时间排序
         if (a.T !== b.T) {
             return a.T - b.T;
         }
-        // 时间相同则按任务索引排序
         return a.taskIndex - b.taskIndex;
     }
 
-    /**
-     * 交换两个元素
-     */
     private swap(i: number, j: number): void {
         const temp = this.heap[i];
         this.heap[i] = this.heap[j];

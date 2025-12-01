@@ -1,16 +1,10 @@
-/**
- * 资源加载器 - 支持图片、音频、视频、脚本、Three.js资源等
- */
-
+// Resource loader supporting images, audio, video, scripts, and Three.js resources
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {FBXLoader} from 'three/examples/jsm/loaders/FBXLoader.js';
 import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader.js';
 import {FontLoader} from 'three/examples/jsm/loaders/FontLoader.js';
 
-/**
- * 资源类型枚举
- */
 export enum ResourceType {
     IMAGE = 'image',
     AUDIO = 'audio',
@@ -26,37 +20,20 @@ export enum ResourceType {
     FONT = 'font'
 }
 
-/**
- * 单个资源配置
- */
 export interface ResourceConfig {
-    /** 资源唯一标识 */
     key: string;
-    /** 资源路径 */
     url: string | string[];
-    /** 资源类型 */
     type: ResourceType;
-    /** 加载超时时间（毫秒） */
     timeout?: number;
 }
 
-/**
- * 加载参数
- */
 export interface LoadParams {
-    /** 资源配置数组 */
     resources: ResourceConfig[];
-    /** 单个资源加载成功回调 */
     onProgress?: (key: string, loaded: number, total: number) => void;
-    /** 单个资源加载失败回调 */
     onError?: (key: string, error: string) => void;
-    /** 全部加载完成回调 */
     onComplete?: (resourceMap: Map<string, any>) => void;
 }
 
-/**
- * 资源加载器类
- */
 export class ResourceLoader {
     private resourceMap: Map<string, any> = new Map();
     private textureLoader: THREE.TextureLoader;
