@@ -50,25 +50,21 @@ export class SceneManager {
                 await this.currentScene.onExit();
             }
 
-            console.log(`[SceneManager] Loading scene: ${sceneConfig.name}`);
 
             const resourceMap = await this.resourceLoader.load({
                 resources: sceneConfig.resources,
                 onProgress: (key, loaded, total) => {
                     if (currentAbortController.signal.aborted) {
-                        console.log(`[SceneManager] Scene loading cancelled: ${sceneConfig.name}`);
                         return;
                     }
                     const percentage = Math.floor((loaded / total) * 100);
-                    console.log(`[SceneManager] Loading ${key}... (${loaded}/${total}) ${percentage}%`);
                     sceneConfig.onLoadProgress?.(loaded, total, percentage);
                 },
                 onError: (key, error) => {
                     console.error(`[SceneManager] Failed to load ${key}: ${error}`);
                 },
                 onComplete: (map) => {
-                    console.log(`[SceneManager] All resources loaded for scene: ${sceneConfig.name}`);
-                }
+                                    }
             });
 
             if (currentAbortController.signal.aborted) {

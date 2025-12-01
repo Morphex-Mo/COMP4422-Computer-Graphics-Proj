@@ -97,45 +97,6 @@ function convertResources(resources?: SimpleSceneDefinition['resources']): Resou
     return configs;
 }
 
-/**
- * 定义一个场景（类似"关卡"）
- * @param definition 场景定义
- * @returns 返回一个函数，调用后开始加载并进入场景
- *
- * @example
- * ```typescript
- * const level1 = defineScene({
- *   id: 'level1',
- *   name: '第一关',
- *   resources: {
- *     textures: {
- *       'ground': '/textures/ground.jpg',
- *       'wall': '/textures/wall.jpg'
- *     },
- *     gltfModels: {
- *       'player': '/models/player.gltf',
- *       'enemy': '/models/enemy.gltf'
- *     },
- *     shaders: {
- *       'customVertex': '/shaders/custom.vert',
- *       'customFragment': '/shaders/custom.frag'
- *     }
- *   },
- *   onLoadProgress: (loaded, total, percentage) => {
- *     console.log(`Loading: ${percentage}%`);
- *   },
- *   main: async (resources) => {
- *     // 资源加载完成，开始场景逻辑
- *     const groundTexture = resources.get('ground');
- *     const playerModel = resources.get('player');
- *     // ... 初始化场景
- *   }
- * });
- *
- * // 调用以进入场景
- * level1();
- * ```
- */
 export function defineScene(definition: SimpleSceneDefinition): () => Promise<void> {
     const sceneConfig: SceneConfig = {
         id: definition.id,
@@ -153,34 +114,6 @@ export function defineScene(definition: SimpleSceneDefinition): () => Promise<vo
     return () => globalSceneManager.loadAndEnterScene(definition.id);
 }
 
-/**
- * 创建资源加载包装器（用于包装关卡函数）
- * @param resources 资源配置
- * @param levelFunction 关卡函数
- * @param options 可选配置
- * @returns 包装后的函数，调用后开始加载资源并执行关卡函数
- *
- * @example
- * ```typescript
- * const startLevel1 = createLevelLoader(
- *   {
- *     textures: { 'ground': '/textures/ground.jpg' },
- *     gltfModels: { 'player': '/models/player.gltf' }
- *   },
- *   (resources) => {
- *     // 关卡逻辑
- *     const groundTexture = resources.get('ground');
- *     const playerModel = resources.get('player');
- *   },
- *   {
- *     onProgress: (percentage) => console.log(`Loading: ${percentage}%`)
- *   }
- * );
- *
- * // 开始加载并进入关卡
- * startLevel1();
- * ```
- */
 export function createLevelLoader(
     resources: SimpleSceneDefinition['resources'],
     levelFunction: (resources: Map<string, any>) => void | Promise<void>,

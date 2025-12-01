@@ -66,10 +66,8 @@ export const starCollectorScene = defineScene({
         }
     },
     onLoadProgress: (loaded, total, percentage) => {
-        console.log(`[StarCollector] 加载进度: ${percentage}% (${loaded}/${total})`);
     },
     main: async (resources) => {
-        console.log('[StarCollector] 场景启动');
         const foxGltf = resources.get('fox');
         const treeGltf = resources.get('treeSource'); // 获取树模型
         const foxVertex = resources.get('foxVertex') as string;
@@ -131,7 +129,6 @@ export const starCollectorScene = defineScene({
             debugControls.target.set(0, 2, 0);
             debugControls.update();
             debugCameraEnabled = true;
-            console.log('[StarCollector][Debug] 摄像机调试模式已开启 (按 C 关闭)');
             showDebugHint(true);
         }
         function disableDebugCamera() {
@@ -139,7 +136,6 @@ export const starCollectorScene = defineScene({
             debugControls.dispose();
             debugControls = null;
             debugCameraEnabled = false;
-            console.log('[StarCollector][Debug] 摄像机调试模式已关闭 (按 C 开启)');
             showDebugHint(false);
         }
         function toggleDebugCamera() {
@@ -150,24 +146,31 @@ export const starCollectorScene = defineScene({
 
         // 简单的屏幕提示
         let debugHintDiv: HTMLDivElement | null = null;
-        function showDebugHint(visible: boolean) {
+        function showDebugHint(isDebugMode: boolean) {
             if (!app) return;
             if (!debugHintDiv) {
                 debugHintDiv = document.createElement('div');
                 debugHintDiv.style.position = 'absolute';
                 debugHintDiv.style.bottom = '10px';
                 debugHintDiv.style.right = '10px';
-                debugHintDiv.style.padding = '6px 10px';
-                debugHintDiv.style.background = 'rgba(0,0,0,0.45)';
+                debugHintDiv.style.padding = '8px 12px';
+                debugHintDiv.style.background = 'rgba(0,0,0,0.6)';
                 debugHintDiv.style.color = '#fff';
-                debugHintDiv.style.fontSize = '12px';
+                debugHintDiv.style.fontSize = '13px';
                 debugHintDiv.style.fontFamily = 'monospace';
                 debugHintDiv.style.borderRadius = '4px';
                 debugHintDiv.style.pointerEvents = 'none';
+                debugHintDiv.style.transition = 'background 0.3s ease';
                 app.appendChild(debugHintDiv);
             }
-            debugHintDiv.textContent = 'Debug Camera ON (C to toggle)';
-            debugHintDiv.style.opacity = visible ? '1' : '0';
+            // 根据状态显示不同的提示文本和样式
+            if (isDebugMode) {
+                debugHintDiv.textContent = 'Controlling Camera (按 C 退出)';
+                debugHintDiv.style.background = 'rgba(34,139,34,0.7)'; // 绿色背景表示激活
+            } else {
+                debugHintDiv.textContent = 'C --> Controlling Camera';
+                debugHintDiv.style.background = 'rgba(0,0,0,0.6)'; // 暗色背景表示未激活
+            }
         }
 
         function handleKey(e: KeyboardEvent) {
@@ -176,6 +179,9 @@ export const starCollectorScene = defineScene({
             }
         }
         window.addEventListener('keydown', handleKey);
+        
+        // 初始化时显示提示（默认非调试模式）
+        showDebugHint(false);
 
         // 山地生成 (使用完整算法)
         const NoiseModule = require('noisejs');
@@ -531,33 +537,33 @@ export const starCollectorScene = defineScene({
                 const timeProgress = Math.min(elapsed / cameraPullEnd, 1); // 0 到 35 秒映射到 0-1
                 const azureTime = AZURE_TIME_START + (AZURE_TIME_END - AZURE_TIME_START) * timeProgress;
                 azureManager.time.setTime(azureTime);
-            }
 
-            // ===== 摄像机环绕动画（0-7秒） =====
-            if (elapsed < ORBIT_DURATION) {
-                const orbitProgress = elapsed / ORBIT_DURATION; // 0-1
-                const angle = orbitProgress * Math.PI; // 从侧面(0)到背面(π)
-                const rampProgress = Math.min(elapsed / ORBIT_RAMP_DURATION, 1);
-                // 使用 easeInOutQuad 平滑半径与高度插值
-                const easedRamp = easeInOutQuad(rampProgress);
-                const currentRadius = THREE.MathUtils.lerp(ORBIT_START_RADIUS, ORBIT_RADIUS, easedRamp);
-                const currentHeight = THREE.MathUtils.lerp(ORBIT_START_HEIGHT, ORBIT_HEIGHT, easedRamp);
-                const camX = Math.cos(angle) * currentRadius;
-                const camZ = Math.sin(angle) * currentRadius;
-                camera.position.set(camX, currentHeight, camZ);
-                camera.lookAt(0, foxTargetY, 0);
-            } else if (elapsed >= ORBIT_DURATION && elapsed < ORBIT_DURATION + 1.0) {
-                // 7-8秒：平滑过渡到最终位置（后方偏下），保持前一阶段连续性
-                const transitionProgress = (elapsed - ORBIT_DURATION) / 1.0; // 0-1
-                const eased = easeInOutQuad(Math.min(Math.max(transitionProgress, 0), 1));
-                const orbitEndPos = new THREE.Vector3(Math.cos(Math.PI) * ORBIT_RADIUS, ORBIT_HEIGHT, Math.sin(Math.PI) * ORBIT_RADIUS); // (-R, H, 0)
-                camera.position.lerpVectors(orbitEndPos, FINAL_CAM_POS, eased);
-                const lookAtPos = new THREE.Vector3().lerpVectors(new THREE.Vector3(0, foxTargetY, 0), FINAL_LOOK_AT, eased);
-                camera.lookAt(lookAtPos);
-            } else if (elapsed >= ORBIT_DURATION + 1.0 && elapsed < cameraPullStart) {
-                // 中间保持最终阶段稳定，不产生跳动
-                camera.position.copy(FINAL_CAM_POS);
-                camera.lookAt(FINAL_LOOK_AT);
+                // ===== 摄像机环绕动画（0-7秒） =====
+                if (elapsed < ORBIT_DURATION) {
+                    const orbitProgress = elapsed / ORBIT_DURATION; // 0-1
+                    const angle = orbitProgress * Math.PI; // 从侧面(0)到背面(π)
+                    const rampProgress = Math.min(elapsed / ORBIT_RAMP_DURATION, 1);
+                    // 使用 easeInOutQuad 平滑半径与高度插值
+                    const easedRamp = easeInOutQuad(rampProgress);
+                    const currentRadius = THREE.MathUtils.lerp(ORBIT_START_RADIUS, ORBIT_RADIUS, easedRamp);
+                    const currentHeight = THREE.MathUtils.lerp(ORBIT_START_HEIGHT, ORBIT_HEIGHT, easedRamp);
+                    const camX = Math.cos(angle) * currentRadius;
+                    const camZ = Math.sin(angle) * currentRadius;
+                    camera.position.set(camX, currentHeight, camZ);
+                    camera.lookAt(0, foxTargetY, 0);
+                } else if (elapsed >= ORBIT_DURATION && elapsed < ORBIT_DURATION + 1.0) {
+                    // 7-8秒：平滑过渡到最终位置（后方偏下），保持前一阶段连续性
+                    const transitionProgress = (elapsed - ORBIT_DURATION) / 1.0; // 0-1
+                    const eased = easeInOutQuad(Math.min(Math.max(transitionProgress, 0), 1));
+                    const orbitEndPos = new THREE.Vector3(Math.cos(Math.PI) * ORBIT_RADIUS, ORBIT_HEIGHT, Math.sin(Math.PI) * ORBIT_RADIUS); // (-R, H, 0)
+                    camera.position.lerpVectors(orbitEndPos, FINAL_CAM_POS, eased);
+                    const lookAtPos = new THREE.Vector3().lerpVectors(new THREE.Vector3(0, foxTargetY, 0), FINAL_LOOK_AT, eased);
+                    camera.lookAt(lookAtPos);
+                } else if (elapsed >= ORBIT_DURATION + 1.0 && elapsed < cameraPullStart) {
+                    // 中间保持最终阶段稳定，不产生跳动
+                    camera.position.copy(FINAL_CAM_POS);
+                    camera.lookAt(FINAL_LOOK_AT);
+                }
             }
 
             // Fox 呼吸与微动画：改用可暂停的 elapsed 以便调试时也暂停
@@ -577,6 +583,19 @@ export const starCollectorScene = defineScene({
 
             // 星星与剧本逻辑：只有在非调试模式下才驱动（时间线延后5秒）
             if (!debugCameraEnabled) {
+                // ===== 摄像机拉远（33-35s，原28-30s + 5s） — 保持与前阶段连续并平滑视线过渡 =====
+                if (elapsed >= cameraPullStart && elapsed <= cameraPullEnd) {
+                    const rawT = (elapsed - cameraPullStart) / (cameraPullEnd - cameraPullStart);
+                    const eased = easeInOutQuad(Math.min(Math.max(rawT, 0), 1));
+                    camera.position.lerpVectors(FINAL_CAM_POS, PULL_TARGET_POS, eased);
+                    const lookAtInterp = new THREE.Vector3().lerpVectors(FINAL_LOOK_AT, PULL_TARGET_LOOK_AT, eased);
+                    camera.lookAt(lookAtInterp);
+                } else if (elapsed > cameraPullEnd) {
+                    // 拉远结束后保持最终位置与视线，防止恢复原 lookAt 造成跳变
+                    camera.position.copy(PULL_TARGET_POS);
+                    camera.lookAt(PULL_TARGET_LOOK_AT);
+                }
+
                 // 星星生成逻辑
                 // 第一颗星 11-17s 下落（原6-12s + 5s）
                 if (elapsed >= 11 && !star1) {
@@ -585,8 +604,8 @@ export const starCollectorScene = defineScene({
                     star1.targetBone = leftHand;
                     star1.startPos.set(0, 20, 0);
                     star1.targetPos.copy(getBoneWorldPos(leftHand, new THREE.Vector3(-0.4, 1.4, 0)));
-                    console.log('[StarCollector] ✨ 第一颗星出现');
-                    // TODO 播放星星出现音效
+
+
                 }
                 // 第二颗星 26-32s 下落（原21-27s + 5s）
                 if (elapsed >= 26 && !star2) {
@@ -595,8 +614,8 @@ export const starCollectorScene = defineScene({
                     star2.targetBone = rightHand;
                     star2.startPos.set(2, 22, -1);
                     star2.targetPos.copy(getBoneWorldPos(rightHand, new THREE.Vector3(0.4, 1.4, 0)));
-                    console.log('[StarCollector] ✨ 第二颗星出现');
-                    // TODO 播放第二颗星出现音效
+
+
 
                     if (foxGltf.animations?.length) {
                         mixer = new THREE.AnimationMixer(foxRoot);
@@ -612,14 +631,12 @@ export const starCollectorScene = defineScene({
                     star3.targetPos.copy(star3.startPos);
                     star3.caught = true; // 直接悬浮
                     star3.hoverOffset = new THREE.Vector3();
-                    console.log('[StarCollector] ✨ 第三颗星出现 (触发释放准备)');
                 }
 
                 // 启动连续星星发射（取代一次性喷射）
                 if (elapsed >= EMIT_START && !emitterActive) {
                     emitterActive = true;
                     // overlay removed — no text fade needed
-                    console.log('[StarCollector] 🌌 连续星星发射启动');
                 }
 
                 // 更新星星下落 & 状态
@@ -646,7 +663,6 @@ export const starCollectorScene = defineScene({
                             star.caught = true;
                             star.pulseStart = elapsed;
                             star.mesh.scale.set(2.0, 2.0, 2.0);
-                            console.log('[StarCollector] ⭐ 星星捕获');
                         }
                     } else {
                         const collectTime = elapsed - (star.pulseStart || elapsed);
@@ -736,19 +752,6 @@ export const starCollectorScene = defineScene({
                     if (star2 && star2.mesh.visible) star2.mesh.position.x = 0.5 + Math.cos(orbitT * 2) * 0.1;
                 }
 
-                // 摄像机拉远（33-35s，原28-30s + 5s） — 保持与前阶段连续并平滑视线过渡
-                if (elapsed >= cameraPullStart && elapsed <= cameraPullEnd) {
-                    const rawT = (elapsed - cameraPullStart) / (cameraPullEnd - cameraPullStart);
-                    const eased = easeInOutQuad(Math.min(Math.max(rawT, 0), 1));
-                    camera.position.lerpVectors(FINAL_CAM_POS, PULL_TARGET_POS, eased);
-                    const lookAtInterp = new THREE.Vector3().lerpVectors(FINAL_LOOK_AT, PULL_TARGET_LOOK_AT, eased);
-                    camera.lookAt(lookAtInterp);
-                } else if (elapsed > cameraPullEnd) {
-                    // 拉远结束后保持最终位置与视线，防止恢复原 lookAt 造成跳变
-                    camera.position.copy(PULL_TARGET_POS);
-                    camera.lookAt(PULL_TARGET_LOOK_AT);
-                }
-
                 // 文本显示逻辑被释放星星替换（不再显示）
             } else {
                 // 调试模式：允许自由控制摄像机，不执行脚本镜头变换
@@ -758,7 +761,6 @@ export const starCollectorScene = defineScene({
             controller.update();
         }
         animate();
-        console.log('[StarCollector] 初始化完成 (AtmosphereController + Azure 夜空)');
 
         cleanup = () => {
             if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
@@ -776,6 +778,5 @@ export const starCollectorScene = defineScene({
 });
 
 export function startStarCollectorScene() {
-    console.log('=== 启动星星收藏家场景 ===');
     return starCollectorScene();
 }

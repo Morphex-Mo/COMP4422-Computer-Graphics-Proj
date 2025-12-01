@@ -622,7 +622,6 @@ export class AtmosphereController {
       // Nighttime - use moon direction (opposite of sun)
       const moonForward = sunForward.clone().negate();
       this.directionalLight.position.copy(moonForward.clone().multiplyScalar(20));
-        //console.log(this.baseLightIntensity,this.directionalLight.color);
       // Low intensity for moon light
       this.directionalLight.intensity = this.baseLightIntensity;// * 0.1;
     }
