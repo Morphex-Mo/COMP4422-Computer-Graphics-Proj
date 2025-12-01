@@ -28,77 +28,66 @@ function convertResources(resources?: SimpleSceneDefinition['resources']): Resou
 
     const configs: ResourceConfig[] = [];
 
-    // 处理图片
     if (resources.images) {
         Object.entries(resources.images).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.IMAGE });
         });
     }
 
-    // 处理音频
     if (resources.audios) {
         Object.entries(resources.audios).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.AUDIO });
         });
     }
 
-    // 处理视频
     if (resources.videos) {
         Object.entries(resources.videos).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.VIDEO });
         });
     }
 
-    // 处理纹理
     if (resources.textures) {
         Object.entries(resources.textures).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.TEXTURE });
         });
     }
 
-    // 处理立方体纹理
     if (resources.cubeTextures) {
         Object.entries(resources.cubeTextures).forEach(([key, urls]) => {
             configs.push({ key, url: urls, type: ResourceType.CUBE_TEXTURE });
         });
     }
 
-    // 处理GLTF模型
     if (resources.gltfModels) {
         Object.entries(resources.gltfModels).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.MODEL_GLTF });
         });
     }
 
-    // 处理FBX模型
     if (resources.fbxModels) {
         Object.entries(resources.fbxModels).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.MODEL_FBX });
         });
     }
 
-    // 处理OBJ模型
     if (resources.objModels) {
         Object.entries(resources.objModels).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.MODEL_OBJ });
         });
     }
 
-    // 处理Shader
     if (resources.shaders) {
         Object.entries(resources.shaders).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.SHADER });
         });
     }
 
-    // 处理JSON
     if (resources.jsons) {
         Object.entries(resources.jsons).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.JSON });
         });
     }
 
-    // 处理字体
     if (resources.fonts) {
         Object.entries(resources.fonts).forEach(([key, url]) => {
             configs.push({ key, url, type: ResourceType.FONT });

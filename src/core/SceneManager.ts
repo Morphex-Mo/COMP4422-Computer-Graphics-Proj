@@ -135,23 +135,14 @@ export class SceneManager {
         return this.currentScene;
     }
 
-    /**
-     * 获取资源加载器
-     */
     getResourceLoader(): ResourceLoader {
         return this.resourceLoader;
     }
 
-    /**
-     * 检查是否正在加载
-     */
     getIsLoading(): boolean {
         return this.isLoading;
     }
 }
 
-/**
- * 全局场景管理器实例
- */
 export const globalSceneManager = new SceneManager();
 
