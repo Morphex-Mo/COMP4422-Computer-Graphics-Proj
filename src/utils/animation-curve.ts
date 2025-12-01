@@ -46,7 +46,6 @@ export class AnimationCurve {
   }
 
   copyFrom(src: AnimationCurve) {
-    // shallow copy keys
     this.keys = (src as any).keys ? [...(src as any).keys] : [];
   }
 }

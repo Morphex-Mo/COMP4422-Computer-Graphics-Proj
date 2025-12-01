@@ -1,22 +1,12 @@
-/**
- * 场景配置 - 相机、渲染器等共享配置
- */
-
 import * as THREE from 'three';
 
-/**
- * 相机配置接口
- */
 export interface CameraConfig {
-    /** 相机类型 */
     type: 'perspective' | 'orthographic';
-    /** 透视相机配置 */
     perspective?: {
         fov: number;
         near: number;
         far: number;
     };
-    /** 正交相机配置 */
     orthographic?: {
         left: number;
         right: number;
@@ -25,42 +15,25 @@ export interface CameraConfig {
         near: number;
         far: number;
     };
-    /** 初始位置 */
     position?: { x: number; y: number; z: number };
-    /** 初始旋转 */
     rotation?: { x: number; y: number; z: number };
-    /** 初始目标点 */
     lookAt?: { x: number; y: number; z: number };
 }
 
-/**
- * 渲染器配置接口
- */
 export interface RendererConfig {
-    /** 抗锯齿 */
     antialias?: boolean;
-    /** 像素比 */
     pixelRatio?: number;
-    /** 阴影 */
     shadowMap?: {
         enabled: boolean;
         type?: THREE.ShadowMapType;
     };
-    /** 色调映射 */
     toneMapping?: THREE.ToneMapping;
-    /** 曝光度 */
     toneMappingExposure?: number;
-    /** 输出编码 */
     outputColorSpace?: THREE.ColorSpace;
 }
 
-/**
- * 场景环境配置接口
- */
 export interface SceneEnvironmentConfig {
-    /** 背景颜色 */
     backgroundColor?: number | string;
-    /** 雾效 */
     fog?: {
         type: 'linear' | 'exponential';
         color: number | string;
@@ -68,12 +41,10 @@ export interface SceneEnvironmentConfig {
         far?: number;
         density?: number;
     };
-    /** 环境光 */
     ambientLight?: {
         color: number | string;
         intensity: number;
     };
-    /** 方向光 */
     directionalLight?: {
         color: number | string;
         intensity: number;
@@ -82,11 +53,7 @@ export interface SceneEnvironmentConfig {
     };
 }
 
-/**
- * 预设相机配置
- */
 export const CameraPresets = {
-    /** 默认透视相机 */
     default: {
         type: 'perspective' as const,
         perspective: {
@@ -97,7 +64,6 @@ export const CameraPresets = {
         position: { x: 0, y: 5, z: 10 },
         lookAt: { x: 0, y: 0, z: 0 }
     },
-    /** 俯视角相机 */
     topDown: {
         type: 'perspective' as const,
         perspective: {
@@ -108,7 +74,6 @@ export const CameraPresets = {
         position: { x: 0, y: 20, z: 0 },
         lookAt: { x: 0, y: 0, z: 0 }
     },
-    /** 第一人称相机 */
     firstPerson: {
         type: 'perspective' as const,
         perspective: {
@@ -119,7 +84,6 @@ export const CameraPresets = {
         position: { x: 0, y: 1.6, z: 0 },
         lookAt: { x: 0, y: 1.6, z: -1 }
     },
-    /** 正交相机 */
     orthographic: {
         type: 'orthographic' as const,
         orthographic: {
@@ -135,11 +99,7 @@ export const CameraPresets = {
     }
 } as const;
 
-/**
- * 预设渲染器配置
- */
 export const RendererPresets = {
-    /** 默认配置 */
     default: {
         antialias: true,
         pixelRatio: window.devicePixelRatio,
@@ -150,7 +110,6 @@ export const RendererPresets = {
         toneMappingExposure: 1.0,
         outputColorSpace: THREE.SRGBColorSpace
     },
-    /** 高质量配置 */
     highQuality: {
         antialias: true,
         pixelRatio: Math.min(window.devicePixelRatio, 2),
@@ -162,7 +121,6 @@ export const RendererPresets = {
         toneMappingExposure: 1.2,
         outputColorSpace: THREE.SRGBColorSpace
     },
-    /** 性能优先配置 */
     performance: {
         antialias: false,
         pixelRatio: 1,
@@ -175,11 +133,7 @@ export const RendererPresets = {
     }
 } as const;
 
-/**
- * 预设场景环境配置
- */
 export const SceneEnvironmentPresets = {
-    /** 默认环境 */
     default: {
         backgroundColor: 0x1a1a2e,
         ambientLight: {
@@ -193,7 +147,6 @@ export const SceneEnvironmentPresets = {
             castShadow: false
         }
     },
-    /** 白天室外 */
     daylight: {
         backgroundColor: 0x87ceeb,
         ambientLight: {
@@ -213,7 +166,6 @@ export const SceneEnvironmentPresets = {
             far: 200
         }
     },
-    /** 夜晚 */
     night: {
         backgroundColor: 0x000022,
         ambientLight: {
@@ -227,7 +179,6 @@ export const SceneEnvironmentPresets = {
             castShadow: true
         }
     },
-    /** 室内 */
     indoor: {
         backgroundColor: 0x2a2a2a,
         ambientLight: {
@@ -243,9 +194,6 @@ export const SceneEnvironmentPresets = {
     }
 } as const;
 
-/**
- * 根据配置创建相机
- */
 export function createCamera(config: CameraConfig, aspect: number = window.innerWidth / window.innerHeight): THREE.Camera {
     let camera: THREE.Camera;
 
@@ -271,17 +219,14 @@ export function createCamera(config: CameraConfig, aspect: number = window.inner
         );
     }
 
-    // 设置位置
     if (config.position) {
         camera.position.set(config.position.x, config.position.y, config.position.z);
     }
 
-    // 设置旋转
     if (config.rotation) {
         camera.rotation.set(config.rotation.x, config.rotation.y, config.rotation.z);
     }
 
-    // 设置目标点
     if (config.lookAt) {
         camera.lookAt(config.lookAt.x, config.lookAt.y, config.lookAt.z);
     }
@@ -289,9 +234,6 @@ export function createCamera(config: CameraConfig, aspect: number = window.inner
     return camera;
 }
 
-/**
- * 根据配置创建渲染器
- */
 export function createRenderer(config: RendererConfig): THREE.WebGLRenderer {
     const renderer = new THREE.WebGLRenderer({
         antialias: config.antialias ?? true
@@ -325,16 +267,11 @@ export function createRenderer(config: RendererConfig): THREE.WebGLRenderer {
     return renderer;
 }
 
-/**
- * 应用场景环境配置
- */
 export function applySceneEnvironment(scene: THREE.Scene, config: SceneEnvironmentConfig): void {
-    // 设置背景颜色
     if (config.backgroundColor !== undefined) {
         scene.background = new THREE.Color(config.backgroundColor);
     }
 
-    // 设置雾效
     if (config.fog) {
         if (config.fog.type === 'linear') {
             scene.fog = new THREE.Fog(
@@ -350,7 +287,6 @@ export function applySceneEnvironment(scene: THREE.Scene, config: SceneEnvironme
         }
     }
 
-    // 添加环境光
     if (config.ambientLight) {
         const ambientLight = new THREE.AmbientLight(
             config.ambientLight.color,
@@ -359,7 +295,6 @@ export function applySceneEnvironment(scene: THREE.Scene, config: SceneEnvironme
         scene.add(ambientLight);
     }
 
-    // 添加方向光
     if (config.directionalLight) {
         const directionalLight = new THREE.DirectionalLight(
             config.directionalLight.color,
@@ -377,9 +312,6 @@ export function applySceneEnvironment(scene: THREE.Scene, config: SceneEnvironme
     }
 }
 
-/**
- * 全局场景工具类 - 管理共享的相机和渲染器
- */
 export class GlobalSceneUtils {
     private static camera: THREE.Camera | null = null;
     private static renderer: THREE.WebGLRenderer | null = null;
@@ -387,22 +319,15 @@ export class GlobalSceneUtils {
     private static rendererConfig: RendererConfig | null = null;
     private static resizeHandler: (() => void) | null = null;
 
-    /**
-     * 初始化全局相机和渲染器
-     */
     static initialize(cameraConfig: CameraConfig, rendererConfig: RendererConfig): void {
         this.cameraConfig = cameraConfig;
         this.rendererConfig = rendererConfig;
         this.camera = createCamera(cameraConfig);
         this.renderer = createRenderer(rendererConfig);
 
-        // 添加窗口大小调整监听
         this.setupResizeHandler();
     }
 
-    /**
-     * 使用预设初始化
-     */
     static initializeWithPresets(
         cameraPreset: keyof typeof CameraPresets = 'default',
         rendererPreset: keyof typeof RendererPresets = 'default'
@@ -413,9 +338,6 @@ export class GlobalSceneUtils {
         );
     }
 
-    /**
-     * 获取全局相机
-     */
     static getCamera(): THREE.Camera {
         if (!this.camera) {
             console.warn('[GlobalSceneUtils] Camera not initialized, using default');
@@ -424,9 +346,6 @@ export class GlobalSceneUtils {
         return this.camera!;
     }
 
-    /**
-     * 获取全局渲染器
-     */
     static getRenderer(): THREE.WebGLRenderer {
         if (!this.renderer) {
             console.warn('[GlobalSceneUtils] Renderer not initialized, using default');
@@ -435,9 +354,6 @@ export class GlobalSceneUtils {
         return this.renderer!;
     }
 
-    /**
-     * 重置相机到配置的初始状态
-     */
     static resetCamera(): void {
         if (!this.cameraConfig || !this.camera) return;
 
@@ -466,9 +382,6 @@ export class GlobalSceneUtils {
         }
     }
 
-    /**
-     * 设置渲染目标容器
-     */
     static attachToContainer(containerId: string = 'app'): void {
         const container = document.getElementById(containerId);
         if (!container) {
@@ -481,9 +394,6 @@ export class GlobalSceneUtils {
         container.appendChild(renderer.domElement);
     }
 
-    /**
-     * 设置窗口大小调整处理
-     */
     private static setupResizeHandler(): void {
         if (this.resizeHandler) {
             window.removeEventListener('resize', this.resizeHandler);
@@ -510,9 +420,6 @@ export class GlobalSceneUtils {
         window.addEventListener('resize', this.resizeHandler);
     }
 
-    /**
-     * 清理资源
-     */
     static dispose(): void {
         if (this.resizeHandler) {
             window.removeEventListener('resize', this.resizeHandler);

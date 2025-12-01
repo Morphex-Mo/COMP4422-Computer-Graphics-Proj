@@ -11,7 +11,6 @@ export class Gradient {
     if (keys && keys.length) {
       this.keys = [...keys].sort((a, b) => a.time - b.time);
     } else {
-      // default white
       this.keys = [
         { time: 0, color: { r: 1, g: 1, b: 1, a: 1 } },
         { time: 1, color: { r: 1, g: 1, b: 1, a: 1 } },

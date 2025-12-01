@@ -1,4 +1,3 @@
-// Task object pool to reduce GC pressure
 export class TaskPool {
     private taskPool: any[] = [];
 
@@ -19,9 +18,9 @@ export class TaskPool {
 }
 
 export interface TaskObject<T = any> {
-    T: number;           // Execute time
-    f: Function;         // Execute function
-    taskIndex: number;   // Task index
-    ar: any[];          // Arguments
+    T: number;
+    f: Function;
+    taskIndex: number;
+    ar: any[];
 }
 

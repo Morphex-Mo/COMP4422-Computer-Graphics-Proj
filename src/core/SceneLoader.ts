@@ -206,9 +206,6 @@ export function createLevelLoader(
     });
 }
 
-/**
- * 辅助函数：创建进度条UI
- */
 export function createLoadingUI(containerId: string = 'app'): {
     update: (percentage: number) => void;
     remove: () => void;

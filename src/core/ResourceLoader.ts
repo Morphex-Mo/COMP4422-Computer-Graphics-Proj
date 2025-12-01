@@ -54,9 +54,6 @@ export class ResourceLoader {
         this.fileLoader = new THREE.FileLoader();
     }
 
-    /**
-     * 加载图片资源
-     */
     private loadImage(url: string, timeout: number = 30000): Promise<HTMLImageElement> {
         return new Promise((resolve, reject) => {
             const img = new Image();

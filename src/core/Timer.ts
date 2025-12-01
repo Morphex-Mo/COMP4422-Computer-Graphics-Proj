@@ -127,9 +127,6 @@ export class Timer {
         }
     }
 
-    /**
-     * 时间强同步模式启动
-     */
     private startWithTimeSync(): void {
         let task: TaskObject | undefined;
         let now: number;
@@ -138,14 +135,12 @@ export class Timer {
         let curTime: number;
         const self = this;
         const process = () => {
-            // 计算实际经过的时间
             curTime = Date.now();
             step = Math.max(self.calcTimePassed(curTime - lastTime) * self.speed, 0);
             lastTime = curTime;
 
             now = self.now += step;
 
-            // 处理优先队列中的任务
             while ((task = self.taskQueue.peek()) && now >= task.T) {
                 self.taskQueue.pop();
                 if (task.T === -Infinity) {
@@ -155,7 +150,6 @@ export class Timer {
                     continue;
                 }
                 try {
-                    // 设置时间偏移
                     self.timeOffset = task.T - self.now;
                     task.f(...task.ar);
                     self.pool.recycle(task);
@@ -164,7 +158,6 @@ export class Timer {
                 }
             }
 
-            // 处理Set中的短任务
             self.taskSet.forEach(task => {
                 if (now >= task.T) {
                     try {
@@ -178,7 +171,6 @@ export class Timer {
                 }
             });
 
-            // 重置时间偏移
             self.timeOffset = null;
         };
 

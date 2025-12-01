@@ -1,12 +1,9 @@
-/**
- * 极简事件中心，仿 AzureNotificationCenter。
- */
 export type TimeSystemListener = (payload: {
-  timeline: number;       // 0..24
-  timeOfDay: number;      // 0..24
+  timeline: number;
+  timeOfDay: number;
   hour: number;
   minute: number;
-  evaluationTime: number; // 曲线评估用
+  evaluationTime: number;
 }) => void;
 
 export type WeatherSystemListener = (payload: {
@@ -17,13 +14,11 @@ export type WeatherSystemListener = (payload: {
 type VoidListener = () => void;
 
 export class NotificationCenter {
-  // Time events
   private timelineChanged: TimeSystemListener[] = [];
   private minuteChanged: TimeSystemListener[] = [];
   private hourChanged: TimeSystemListener[] = [];
   private dayChanged: VoidListener[] = [];
 
-  // Weather events
   private beforeWeatherUpdate: WeatherSystemListener[] = [];
   private afterWeatherUpdate: WeatherSystemListener[] = [];
   private weatherTransitionEnd: VoidListener[] = [];
@@ -47,5 +42,4 @@ export class NotificationCenter {
   emitWeatherTransitionEnd() { this.weatherTransitionEnd.forEach(f => f()); }
 }
 
-// 单例（也可按需每个 Manager 自己持有实例）
 export const AzureEvents = new NotificationCenter();

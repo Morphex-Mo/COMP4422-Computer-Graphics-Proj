@@ -20,36 +20,20 @@ export class GlobalWeatherEntry {
   constructor(public preset: WeatherPreset, public transitionTimeSec = 10) {}
 }
 
-/**
- * 按 AzureWeatherSystem 思路：
- * - schema 定义属性组与属性（编辑时配置结构）
- * - preset 保存各属性的数据（与 schema 对齐）
- * - current + target + 过渡
- */
 export class WeatherSystem {
-  // Schema：定义有哪些组/属性
   weatherPropertyGroupList: WeatherPropertyGroup[] = [];
-
-  // Global weathers（用于快速切换）
   globalWeatherList: GlobalWeatherEntry[] = [];
-
-  // 当前/目标预设
   currentWeatherPreset: WeatherPreset | null = null;
   private targetWeatherPreset: WeatherPreset | null = null;
 
-  // 过渡状态
   private isWeatherChanging = false;
   private transitionStartTime = 0;
   private transitionDuration = 0;
   weatherTransitionProgress = 0;
 
-  // 评估时间（由 TimeSystem 注入）
   evaluationTime = 6.5;
   evaluationTimeGradient = 6.5 / 24.0;
 
-  /**
-   * 每帧/定时调用：评估当前天气或做全局过渡，并发出事件
-   */
   update(nowSec: number, deltaTimeSec: number) {
     AzureEvents.emitBeforeWeatherSystemUpdate({
       evaluationTime: this.evaluationTime,
@@ -79,9 +63,6 @@ export class WeatherSystem {
     });
   }
 
-  /**
-   * 设定评估时间（来自 TimeSystem）
-   */
   setEvaluationTime(evaluationTimeHours: number) {
     this.evaluationTime = evaluationTimeHours;
     this.evaluationTimeGradient = evaluationTimeHours / 24.0;
@@ -115,7 +96,6 @@ export class WeatherSystem {
   private evaluateCurrentWeather() {
     const from = this.currentWeatherPreset;
     if (!from) return;
-    // 兼容：确保 evaluationTime 在 0..24，gradient 使用 0..1
     const hourT = Math.min(24, Math.max(0, this.evaluationTime));
     const gradT = Math.min(1, Math.max(0, this.evaluationTimeGradient));
     for (let gi = 0; gi < this.weatherPropertyGroupList.length; gi++) {
@@ -123,31 +103,25 @@ export class WeatherSystem {
       if (!group.isEnabled) continue;
       const props = group.weatherPropertyList;
       const data = from.propertyGroupDataList[gi];
-      //console.log(props,data);
       for (let pi = 0; pi < props.length; pi++) {
         const prop = props[pi];
         switch (prop.propertyType) {
           case WeatherPropertyType.Float: {
-            // 原生 float
             prop.floatOutput = data.floatData[pi];
             break;
           }
           case WeatherPropertyType.Color: {
-            // 原生 color
             prop.colorOutput = data.colorData[pi];
             break;
           }
           case WeatherPropertyType.Curve: {
-            // 优先曲线；若占位为空则用 floatData
             const curve = data.curveData[pi];
             prop.floatOutput = curve.evaluate(hourT);
             break;
           }
           case WeatherPropertyType.Gradient: {
-            // 优先 gradient；若缺失则用 colorData
             const grad = data.gradientData[pi];
             prop.colorOutput = grad.evaluate(gradT);
-            //console.log(prop.colorOutput,pi);
             break;
           }
           case WeatherPropertyType.Vector3: {

@@ -70,9 +70,6 @@ export class MinHeap<T extends TaskObject> {
         }
     }
 
-    /**
-     * 下沉操作
-     */
     private bubbleDown(index: number): void {
         const length = this.heap.length;
         while (true) {
@@ -94,10 +91,6 @@ export class MinHeap<T extends TaskObject> {
         }
     }
 
-    /**
-     * 比较两个任务
-     * 返回负数表示 a < b，0 表示相等，正数表示 a > b
-     */
     private compare(a: T, b: T): number {
         if (a.T !== b.T) {
             return a.T - b.T;
