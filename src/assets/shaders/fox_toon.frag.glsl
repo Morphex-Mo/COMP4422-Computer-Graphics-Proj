@@ -51,7 +51,7 @@ float smoothAnimeStep(float edge, float smoothness, float x) {
 // 多级柔和阶跃函数
 float multiSmoothStep(float threshold1, float threshold2, float smoothness, float x) {
     if (x > threshold2) {
-        return smoothstep(threshold2 - smoothness, threshold2 + smoothness, x);
+        return mix(0.8, 1.0, smoothstep(threshold2 - smoothness, threshold2 + smoothness, x));
     } else if (x > threshold1) {
         return mix(0.5, 0.8, smoothstep(threshold1 - smoothness, threshold1 + smoothness, x));
     } else {
